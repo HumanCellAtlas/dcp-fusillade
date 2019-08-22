@@ -1,0 +1,5 @@
+# You should not edit this file directly.  Instead, you should edit requirements.txt.in.
+dcplib
+requests
+boto3 >= 1.6.0
+google-cloud-storage >= 1.7.0

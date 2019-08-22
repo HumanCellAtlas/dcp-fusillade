@@ -1,0 +1,4 @@
+dcplib
+requests
+boto3 >= 1.6.0
+google-cloud-storage >= 1.7.0

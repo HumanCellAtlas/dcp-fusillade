@@ -102,3 +102,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+infra/service_account/.terraform
+backend.tf
+variables.tf
+providers.tf
+gcp-credentials.json

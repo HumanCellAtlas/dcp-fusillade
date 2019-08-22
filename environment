@@ -1,0 +1,42 @@
+# HCA Fusillade environment variables
+#
+# Source this file in your bash shell using "source environment".
+#
+# The environment variables set in this file are appropriate for the
+# HCA Fusillade development environment. Individual environment variable
+# values are overridden when deployed, based on the deployment stage.
+
+# Resolve the location of this file and set FUS_HOME to the root
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
+export FUS_HOME="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+
+if [[ -z "${DEPLOYMENT}" ]]; then
+    export FUS_DEPLOYMENT_STAGE=dev
+else
+    # Used for deploying different stages from make files
+    export FUS_DEPLOYMENT_STAGE=${DEPLOYMENT}
+fi
+
+set -a
+AWS_DEFAULT_REGION=us-east-1
+FUS_PARAMETER_STORE=dcp/fusillade
+FUS_SECRETS_STORE=dcp/fusillade
+FUS_TERRAFORM_BACKEND_BUCKET_TEMPLATE=terraform-tsmith
+AWS_SDK_LOAD_CONFIG=1 # Needed for Terraform to correctly use AWS assumed roles
+
+# Used for Managing service accounts:
+GCP_SERVICE_ACCOUNT_NAME=fusillade-deployer-${FUS_DEPLOYMENT_STAGE}
+GCP_SERVICE_ACCOUNT_KEY_SECRET_ID=${FUS_SECRETS_STORE}/${FUS_DEPLOYMENT_STAGE}/deployer_service_account.json
+
+# tags for AWS resources
+FUS_OWNER_TAG=trent.smith@chanzuckerberg.com
+
+set +a
+
+if [[ -f "${FUS_HOME}/environment.local" ]]; then
+    source "${FUS_HOME}/environment.local"
+fi
+
+
+set -a
