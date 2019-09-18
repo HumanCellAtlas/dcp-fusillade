@@ -1,0 +1,45 @@
+{
+  "groups": {
+    "user_default": {
+      "roles": [
+        "dss_reader",
+        "default_user"
+      ]
+    },
+    "dcp_admin": {
+      "roles": [
+        "fusillade_admin",
+        "dss_admin"
+      ],
+      "users": [
+        "chmreid@ucsc.edu",
+        "ranthony@broadinstitute.org",
+        "stahiri@broadinstitute.org",
+        "lblauvel@ucsc.edu",
+        "gpelayo1@ucsc.edu",
+        "adrazhI@broadinstitute.org",
+        "achave11@ucsc.edu",
+        "trent.smith@chanzuckerberg.com",
+        "amarjandu@human-cell-atlas-travis-test.iam.gserviceaccount.com",
+        "bhannafi-service-account@human-cell-atlas-travis-test.iam.gserviceaccount.com",
+        "dss-cli-travis-dev@human-cell-atlas-travis-test.iam.gserviceaccount.com",
+        "lblauvel-service-account@human-cell-atlas-travis-test.iam.gserviceaccount.com",
+        "natan-lao@human-cell-atlas-travis-test.iam.gserviceaccount.com",
+        "travis-test@human-cell-atlas-travis-test.iam.gserviceaccount.com",
+        "tsmith@human-cell-atlas-travis-test.iam.gserviceaccount.com",
+        "xbrianhtest@human-cell-atlas-travis-test.iam.gserviceaccount.com",
+        "mweiden@chanzuckerberg.com"
+      ]
+    },
+    "dcp_wrangler": {
+      "roles": [
+        "dss_wrangler"
+      ]
+    },
+    "dcp_subscriber": {
+      "roles": [
+        "dss_subscriber"
+      ]
+    }
+  }
+}
