@@ -1,0 +1,124 @@
+{
+  "roles": {
+    "default_user": {
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "get_user_info",
+            "Effect": "Allow",
+            "Action": [
+              "fus:GetUser"
+            ],
+            "Resource": [
+              "arn:hca:fus:*:*:user/${fus:user_email}/*",
+              "arn:hca:fus:*:*:user/${fus:user_email}"
+            ]
+          }
+        ]
+      }
+    },
+    "role_deployer": {
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "get_and_put_role",
+            "Effect": "Allow",
+            "Action": [
+              "fus:GetRole",
+              "fus:PutRole"
+            ],
+            "Resource": [
+              "arn:hca:fus:role"
+            ]
+          },
+          {
+            "Sid": "modify_role",
+            "Effect": "Allow",
+            "Action": [
+              "fus:GetRole",
+              "fus:PutRole",
+              "fus:DeleteRole"
+            ],
+            "Resource": [
+              "arn:hca:fus:role/*"
+            ]
+          },
+          {
+            "Sid": "modify_role_policy",
+            "Effect": "Allow",
+            "Action": [
+              "fus:GetRole",
+              "fus:PutRole"
+            ],
+            "Resource": [
+              "arn:hca:fus:role/*/policy"
+            ]
+          }
+        ]
+      }
+    },
+    "group_deployer": {
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "get_and_put_group",
+            "Effect": "Allow",
+            "Action": [
+              "fus:GetGroup",
+              "fus:PutGroup"
+            ],
+            "Resource": [
+              "arn:hca:fus:group"
+            ]
+          },
+          {
+            "Sid": "delete_group",
+            "Effect": "Allow",
+            "Action": [
+              "fus:DeleteGroup"
+            ],
+            "Resource": [
+              "arn:hca:fus:group/*"
+            ]
+          },
+          {
+            "Sid": "modify_group_roles",
+            "Effect": "Allow",
+            "Action": [
+              "fus:GetRoles",
+              "fus:PutRoles"
+            ],
+            "Resource": [
+              "arn:hca:fus:group/*/roles"
+            ]
+          },
+          {
+            "Sid": "modify_group_users",
+            "Effect": "Allow",
+            "Action": [
+              "fus:GetUsers",
+              "fus:PutUsers"
+            ],
+            "Resource": [
+              "arn:hca:fus:group/*/users"
+            ]
+          },
+          {
+            "Sid": "modify_group_policy",
+            "Effect": "Allow",
+            "Action": [
+              "fus:GetGroup",
+              "fus:PutGroup"
+            ],
+            "Resource": [
+              "arn:hca:fus:group/*/policy"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

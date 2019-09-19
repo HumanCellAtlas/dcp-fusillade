@@ -1,0 +1,28 @@
+{
+  "groups": {
+    "user_default": {
+      "roles": [
+        "dss_reader",
+        "default_user"
+      ]
+    },
+    "dcp_admin": {
+      "roles": [
+        "fusillade_admin",
+        "dss_admin"
+      ],
+      "users": [
+      ]
+    },
+    "dcp_wrangler": {
+      "roles": [
+        "dss_wrangler"
+      ]
+    },
+    "dcp_subscriber": {
+      "roles": [
+        "dss_subscriber"
+      ]
+    }
+  }
+}
