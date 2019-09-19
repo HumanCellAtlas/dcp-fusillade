@@ -34,7 +34,7 @@ security_checks:
 deploy:
   stage: deploy
   script:
-    - ./scripts/setup_fusillade.py $CI_COMMIT_REF_NAME --file ./config/groups.json -d
+    - ./scripts/setup_fusillade.py $CI_COMMIT_REF_NAME --file ./config/groups.json -f
   only:
     - integration
     - staging
