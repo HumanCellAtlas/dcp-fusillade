@@ -222,13 +222,14 @@ required to perform this process.
    account or service account that has permission to modify users.
 
 ### As a DCP component how do I give all new users a default level of access to the DCP?
-1. In `dcp-fusillade/config/groups.json` add a role to the group *default_user* that provides the permissions the 
+#### Option 1: Using `setup_fusillade.py`
+1. In `dcp-fusillade/config/groups.json` add a role to the group *user_default* that provides the permissions the 
    desired permissions. All new and existing users will be assigned to this group.
 1. Run the script `setup_fusillade.py {stage} --file groups.json`. Alternatively if using CICD, make a pull request 
    with the changes and allow your CICD flow to apply the changes.
 
 #### Option 2: Using API
-1. Use the `PUT /v1/group/default_user/roles` endpoint to add or remove a role in a group. This must be done using a 
+1. Use the `PUT /v1/group/user_default/roles` endpoint to add or remove a role in a group. This must be done using a 
    user account or service account that has permission to modify users.
    
 ### As a DCP component how do I test my permissions?
