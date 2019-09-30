@@ -12,23 +12,24 @@
         "dss_admin"
       ],
       "users": [
-        "chmreid@ucsc.edu",
-        "ranthony@broadinstitute.org",
-        "stahiri@broadinstitute.org",
-        "lblauvel@ucsc.edu",
-        "gpelayo1@ucsc.edu",
-        "adrazhI@broadinstitute.org",
         "achave11@ucsc.edu",
-        "trent.smith@chanzuckerberg.com",
+        "adrazhI@broadinstitute.org",
+	"ajandu@ucsc.edu",
         "amarjandu@human-cell-atlas-travis-test.iam.gserviceaccount.com",
         "bhannafi-service-account@human-cell-atlas-travis-test.iam.gserviceaccount.com",
+        "chmreid@ucsc.edu",
         "dss-cli-travis-dev@human-cell-atlas-travis-test.iam.gserviceaccount.com",
+        "gpelayo1@ucsc.edu",
         "lblauvel-service-account@human-cell-atlas-travis-test.iam.gserviceaccount.com",
+        "lblauvel@ucsc.edu",
+        "mweiden@chanzuckerberg.com",
         "natan-lao@human-cell-atlas-travis-test.iam.gserviceaccount.com",
+        "ranthony@broadinstitute.org",
+        "stahiri@broadinstitute.org",
         "travis-test@human-cell-atlas-travis-test.iam.gserviceaccount.com",
+        "trent.smith@chanzuckerberg.com",
         "tsmith@human-cell-atlas-travis-test.iam.gserviceaccount.com",
-        "xbrianhtest@human-cell-atlas-travis-test.iam.gserviceaccount.com",
-        "mweiden@chanzuckerberg.com"
+        "xbrianhtest@human-cell-atlas-travis-test.iam.gserviceaccount.com"
       ]
     },
     "dcp_wrangler": {
