@@ -141,8 +141,10 @@ optional arguments:
      }
    }
    ```
-
-1. Run the script `setup_fusillade.py {stage} --file roles.json` to add your roles to fusillade.
+   
+1. Run the script `setup_fusillade.py {stage} --file roles.json` to add your roles to fusillade. It's important to 
+   check that the role name's have not already been used by another component. You can check by run this script locally
+   and check if you would be replacing an existing role's permissions.
 
 1. Users should now be assigned to the new roles. The preferred method of adding users
    to a role is to assign the role to a group and add users to that group (although users
@@ -154,9 +156,8 @@ optional arguments:
 A service account with permission to create and modify fusillade groups is
 required to perform this process.
 
-1. In `humancellatlas/dcpinfra/fusillade/config` create a file named
-   `{group}.json` (where `{group}` is the name of your group). Here is an
-   example of the contents of a `{group}.json` file:
+1. In `dcp-fusillade/config` create or modify a file named `groups.json`. Here is an example of the contents of a 
+   `groups.json` file:
 
    ```json
    {
@@ -185,32 +186,51 @@ required to perform this process.
    }
    ``` 
 
-1. In DCP infra run the script `setup_fusillade.py {stage} --file {group}.json`
+1. In DCP infra run the script `setup_fusillade.py {stage} --file groups.json`
    to add your group to Fusillade. If any roles specified in the group do not
    exist, they will not be added to the group. If any user specified in the group
    are not in the group, they will be added to the group.
 
 ### As a DCP operator how do I remove a role from a group?
+#### Option 1: Using `setup_fusillade.py`
+1. Remove the role from the group defined in `dcp-fusillade/config/groups.json`. 
+1. Run the script `setup_fusillade.py {stage} --file groups.json`. Alternatively if using CICD, make a pull request 
+   with the changes and allow your CICD flow to apply the changes.
 
-Use the `PUT /v1/group/{group_id}/roles` endpoint to remove a role from a group.
-
-This must be done using a user account or service account that has permission to modify groups.
+#### Option 2: Using API
+1. Use the `PUT /v1/group/{group_id}/roles` endpoint to remove a role from a group. This must be done using a user 
+   account or service account that has permission to modify groups.
 
 ### As a DCP operator how do I remove a user from a group?
+#### Option 1: Using `setup_fusillade.py`
+1. Remove the user from the group defined in `dcp-fusillade/config/groups.json`. 
+1. Run the script `setup_fusillade.py {stage} --file groups.json`. Alternatively if using CICD, make a pull request 
+   with the changes and allow your CICD flow to apply the changes.
 
-Use the `PUT /v1/user/{user_id}/groups` endpoint to remove a user from a group. 
-
-This must be done using a user account or service account that has permission to modify users.
+#### Option 2: Using API
+1. Use the `PUT /v1/user/{user_id}/groups` endpoint to remove a user from a group. This must be done using a user 
+   account or service account that has permission to modify users.
 
 ### As a DCP operator how do I give a user or service account permissions?
+#### Option 1: Using `setup_fusillade.py`
+1. Add the user to the group defined in `dcp-fusillade/config/groups.json` that has the desired permissions. 
+1. Run the script `setup_fusillade.py {stage} --file groups.json`. Alternatively if using CICD, make a pull request 
+   with the changes and allow your CICD flow to apply the changes.
 
-Add the user or service account as a member of the group with the desired permissions.
+#### Option 2: Using API
+1. Use the `PUT /v1/user/{user_id}/groups` endpoint to add a user to a group. This must be done using a user 
+   account or service account that has permission to modify users.
 
 ### As a DCP component how do I give all new users a default level of access to the DCP?
+1. In `dcp-fusillade/config/groups.json` add a role to the group *default_user* that provides the permissions the 
+   desired permissions. All new and existing users will be assigned to this group.
+1. Run the script `setup_fusillade.py {stage} --file groups.json`. Alternatively if using CICD, make a pull request 
+   with the changes and allow your CICD flow to apply the changes.
 
-In `humancellatlas/dcp-fusillade/config` add a role to the group *default_user* that provides the 
-permissions for all new users.
-
+#### Option 2: Using API
+1. Use the `PUT /v1/group/default_user/roles` endpoint to add or remove a role in a group. This must be done using a 
+   user account or service account that has permission to modify users.
+   
 ### As a DCP component how do I test my permissions?
 
 1. Create a service account with permission to use the fusillade `POST /v1/policies/evaluate` endpoint.
