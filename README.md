@@ -221,6 +221,30 @@ required to perform this process.
 1. Use the `PUT /v1/user/{user_id}/groups` endpoint to add a user to a group. This must be done using a user 
    account or service account that has permission to modify users.
 
+### As a DCP operator how do I use the Swagger documentation to test the API?
+
+* Visit the Swagger API page for the correct Fusillade deployment:
+    * testing: <https://auth.testing.data.humancellatlas.org/>
+    * dev: <https://auth.dev.data.humancellatlas.org/>
+    * staging: <https://auth.staging.data.humancellatlas.org/>
+    * integration: <https://auth.integration.data.humancellatlas.org/>
+    * prod: <https://auth.data.humancellatlas.org/>
+* Start by logging in with your Google account (clarify who has permission to do this) by clicking the "Log In: Auth0" link at the top of the page
+* Logging in will redirect your browser to a JSON document
+* Copy and paste the value of the field `access_token` (Screenshot 1 below)
+* Return to the Swagger API page for the correct Fusillade deployment (see links above)
+* Click the green "Authorize" button
+* Paste your access token into the text box and click "Authorize" (Screenshot 2 below)
+* Once you are logged in, click "Done"
+
+**Screenshot 1:**
+
+<img width="925" alt="Screen Shot 2019-10-09 at 10 51 36" src="https://user-images.githubusercontent.com/53452777/66507007-3c03ad00-ea83-11e9-982b-be53b7538f7c.png">
+
+**Screenshot 2:**
+
+<img width="970" alt="Screen Shot 2019-10-09 at 10 56 15" src="https://user-images.githubusercontent.com/53452777/66507118-753c1d00-ea83-11e9-9d29-c96491e84401.png">
+
 ### As a DCP component how do I give all new users a default level of access to the DCP?
 #### Option 1: Using `setup_fusillade.py`
 1. In `dcp-fusillade/config/groups.json` add a role to the group *user_default* that provides the permissions the 
