@@ -18,8 +18,6 @@
     {
       "Action": [
         "lambda:*",
-        "es:*",
-        "sns:*",
         "states:*"
       ],
       "Resource": [
