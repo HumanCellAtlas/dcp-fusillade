@@ -1,0 +1,47 @@
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "iam:ListRoles",
+      "Resource": "arn:aws:iam::$account_id:role/"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "logs:*",
+      "Resource": [
+        "arn:aws:logs:*:$account_id:log-group:dss-*-*",
+        "arn:aws:logs:*:*:*"
+      ]
+    },
+    {
+      "Action": [
+        "lambda:*",
+        "es:*",
+        "sns:*",
+        "states:*"
+      ],
+      "Resource": [
+        "arn:aws:lambda:*:$account_id:function:dcp-fus-*",
+        "arn:aws:states:*:$account_id:*:dcp-fus-*"
+      ],
+      "Effect": "Allow"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "secretsmanager:Get*",
+      "Resource": "arn:aws:secretsmanager:*:$account_id:secret:$FUS_SECRETS_STORE/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "tag:GetTagKeys",
+        "tag:GetResources",
+        "tag:GetTagValues",
+        "cloudwatch:*"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
