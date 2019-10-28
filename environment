@@ -18,7 +18,12 @@ else
     export FUS_DEPLOYMENT_STAGE=${DEPLOYMENT}
 fi
 
+EXPORT_ENV_VARS_TO_LAMBDA_ARRAY=(
+	FUS_API_ENDPOINT
+)
+
 set -a
+EXPORT_ENV_VARS_TO_LAMBDA=${EXPORT_ENV_VARS_TO_LAMBDA_ARRAY[*]}
 AWS_DEFAULT_REGION=us-east-1
 FUS_PARAMETER_STORE=dcp/fusillade
 FUS_SECRETS_STORE=dcp/fusillade
@@ -31,6 +36,13 @@ GCP_SERVICE_ACCOUNT_KEY_SECRET_ID=${FUS_SECRETS_STORE}/${FUS_DEPLOYMENT_STAGE}/d
 
 # tags for AWS resources
 FUS_OWNER_TAG=trent.smith@chanzuckerberg.com
+FUS_SERVICE_TAG=fus
+FUS_PROJECT_TAG=dcp
+FUS_STAGE_TAG=${FUS_DEPLOYMENT_STAGE}
+FUS_API_ENDPOINT="https://auth.$FUS_DEPLOYMENT_STAGE.data.humancellatlas.org"
+GITLAB_URL="https://allspark.dev.data.humancellatlas.org"
+GITLAB_PROJECT_ID="76"
+
 
 set +a
 
