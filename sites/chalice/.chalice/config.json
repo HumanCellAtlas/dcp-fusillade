@@ -1,0 +1,16 @@
+{
+  "version": "2.0",
+  "app_name": "dcp-fus",
+  "environment_variables": {
+    "GOOGLE_APPLICATION_CREDENTIALS": "/var/task/chalicelib/gcp-credentials.json"
+  },
+  "stages": {
+    "dev": {
+      "api_gateway_stage": "",
+      "environment_variables": {
+      }
+    }
+  },
+  "lambda_timeout": 300,
+  "lambda_memory_size": 1280
+}
