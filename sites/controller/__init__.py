@@ -10,8 +10,6 @@ import os.path
 import requests
 
 
-
-
 class FusilladeConfig:
     def __init__(self):
         self.api_endpoint = os.getenv('FUS_API_ENDPOINT')

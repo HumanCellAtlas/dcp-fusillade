@@ -15,6 +15,14 @@ config = FusilladeConfig()
 gitlab = GitlabController()
 
 
+def get_groups():
+    group_file_path = "config/groups.json"
+    resp = gitlab.get_file_from_repo(group_file_path)
+    group_data = json.loads(resp.text).get('groups')
+    groups_in_file = [k for k,v in group_data if k != "user_default"]
+    return groups_in_file
+
+
 def add_user_to_group(service_account:str, groups:list):
     group_file_path = "config/groups.json"
     resp = gitlab.get_file_from_repo(group_file_path)
