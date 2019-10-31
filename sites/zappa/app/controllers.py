@@ -1,7 +1,6 @@
 import bisect
 import copy
 import urllib
-import hca
 import sys
 import os
 import json
@@ -9,24 +8,6 @@ import os.path
 import requests
 
 
-class FusilladeConfig:
-    def __init__(self):
-        self.api_endpoint = os.getenv('FUS_API_ENDPOINT')
-        self.swagger_endpoint = f'{self.api_endpoint}/swagger.json'
-        self.auth_client = hca.auth.AuthClient(swagger_url=self.swagger_endpoint)
-
-
-    def get_users(self):
-        return self.auth_client.get_v1_users()
-
-    def get_groups(self):
-        return self.auth_client.get_v1_groups()
-
-    def get_role(self):
-        return self.auth_client.get_v1_roles()
-
-
-#not sure if this class is needed.
 class FileController:
     def __init__(self, file_data, file_path):
         self.file_data = file_data
