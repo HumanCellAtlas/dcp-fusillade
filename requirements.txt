@@ -3,3 +3,5 @@ dcplib
 requests
 boto3 >= 1.6.0
 google-cloud-storage >= 1.7.0
+flask >= 1.1.1
+zappa >= 0.48
