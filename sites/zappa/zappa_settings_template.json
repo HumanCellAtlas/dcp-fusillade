@@ -1,0 +1,17 @@
+{
+    "dev": {
+        "app_function": "run.app",
+        "aws_region": "us-east-1",
+        "profile_name": "default",
+        "project_name": "hca-dcp-users-groups",
+        "runtime": "python3.7",
+        "s3_bucket": "zappa-tow8zwutr",
+        "role_name": "hca-dcp-users-groups-ZappaExecutionRole",
+        "extra_permissions": [],
+        "exclude": [
+            ".git",
+            "app/static",
+            "upload_assets.py"
+        ]
+    }
+}

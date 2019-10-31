@@ -1,0 +1,18 @@
+{% extends "template.html" %}
+{% block title %}
+    <h2>Link User to Group: <span class="text-danger">FAILURE</span></h2>
+    <div class="alert alert-danger" role="alert">
+        <p class="lead">
+        Your request to link the DCP user/service account
+        <span class="alert-link">{{ email }}</span> with group(s) <span class="alert-link">{{ groups }}</span> has failed!
+        </p>
+
+        {% if error_message|length %}
+        <p class="lead">Error Message: {{ error_message }}</p>
+        {% endif %}
+
+        <p class="lead">
+        To get help, please post a message in the <a class="alert-link" href="#">#dcp-help</a> channel in the HCA Slack.
+        </p>
+    </div>
+{% endblock %}

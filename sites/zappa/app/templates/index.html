@@ -1,0 +1,57 @@
+{% extends "template.html" %}
+{% block title %}
+    <h2>Link User to Group</h2>
+    
+    <p class="lead">
+    This form should be used by DCP operators to add DCP users (i.e., service accounts) to DCP groups.
+    </p>
+    
+    <p class="lead">
+    Enter the email address for the user or service account, and check the boxes of any groups to which
+    the user should be added.
+    </p>
+    
+    <p class="lead">This form is ADD-ONLY and will NOT remove users from a group. If a user is already
+    in a group, and that group's checkbox is unchecked, they will NOT be removed from that group.
+    </p>
+    
+    <p class="lead">When you submit your request, a pull request will be created in the
+    <a href="https://allspark.dev.data.humancellatlas.org/HumanCellAtlas/dcp-fusillade">dcp-fusillade</a> 
+    repository on <a href="https://allspark.dev.data.humancellatlas.org">Allspark</a> 
+    to modify the DCP Fusillade configuration files.
+    Once the pull request is approved, changes will be applied by the dcp-fusillade
+    continuous integration system.
+    </p>
+{% endblock %}
+{% block content %}
+    <div class="col-md-4 order-md-2">
+
+        <form method="POST" action="/submit">
+
+            <label for="email">
+                <p class="lead">User/Service Account Email:</p>
+                <input name="email" id="input-email" class="form-control" type="email"
+                placeholder="service-account@domain.com" size="120">
+            </label>
+
+            <hr class="mb-6">
+
+            <label for="groups">
+                <p class="lead">Add User to the Following Groups:</p>
+
+            {% for group in groups %}
+                <div id="checkbox-div-{{group}}" class="custom-control custom-checkbox">
+                    <input name="{{group}}" type="checkbox" class="custom-control-input" id="checkbox-{{group}}">
+                    <label class="custom-control-label" for="select-group">{{group}}</label>
+                </div>
+                <br />
+            {% endfor %}
+
+            <br />
+
+            <button class="btn btn-primary btn-lg btn-block" type="submit">Submit Request</button>
+
+        </form>
+
+    </div>
+{% endblock %}
