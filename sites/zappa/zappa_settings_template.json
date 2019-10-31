@@ -1,6 +1,6 @@
 {
     "dev": {
-        "app_function": "run.app",
+        "app_function": "flask_app.app",
         "aws_region": "us-east-1",
         "profile_name": "default",
         "project_name": "hca-dcp-users-groups",
@@ -11,7 +11,10 @@
         "exclude": [
             ".git",
             "app/static",
-            "upload_assets.py"
+            "Readme.md",
+            "run.py",
+            "zappa_build_deploy_config.sh",
+            "zappa_settings_template.json"
         ]
     }
 }
