@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
-# This script uses the AWS command line to get account information,
-# then sets the appropriate IAM permissions in the zappa settings.
-# Should run this with a service account.
+# This script uses the AWS command line to get account information, substitutes it into the IAM policy document
+# template, then inserts the policy statements from the policy doc into zappa_settings.json.
+# 
+# This script should be run with the service account that will run the lambdas.
 
 set -euo pipefail
 
@@ -18,7 +19,7 @@ zappa_settings="$(dirname $0)/zappa_settings.json"
 zappa_settings_template="$(dirname $0)/zappa_settings_template.json"
 iam_policy_template="$(dirname $0)/iam/policy-templates/dcp-fus-lambda.json"
 
-# Step 1: extract Statement from IAM policy template
+# Step 1: extract "Statement" from IAM policy template
 iam_policy_statement_template=$(cat $iam_policy_template | jq .Statement)
 # Step 2: substitute env vars in template
 iam_policy_statement=$(echo $iam_policy_statement_template | envsubst '$FUS_SECRETS_STORE $account_id $stage')

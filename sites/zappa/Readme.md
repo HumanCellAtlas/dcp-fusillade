@@ -7,6 +7,7 @@ authentication/authorization layer.
 [zappa](https://github.com/Miserlou/Zappa) is a framework for deploying dynamic
 sites that use Flask via AWS Lambda functions.
 
+---
 
 # necessary parts
 
@@ -15,6 +16,11 @@ sites that use Flask via AWS Lambda functions.
 To install:
 
     pip install zappa
+
+## setting up virtual environment
+
+You should set up a virtual environment in the `zappa/` folder, and it should be independent of any virtual environment
+anywhere else in the dcp-fusillade repo. (This avoids installing/uploading unnecessary software packages to the lambda.)
 
 ## making `zappa_settings.json`
 
@@ -46,7 +52,13 @@ dcp-fusillade repository.
 
 ## environment
 
-This deployment utilizes the `environment` file at the root of this repo.
+This deployment utilizes the `environment` file at the root of this repo. To source these files:
+
+```
+source ../../environment
+source ../../environment.local
+```
+
 Env vars used include:
 
 * `FUS_DEPLOYMENT_STAGE`
@@ -88,51 +100,52 @@ Zappa creates a default IAM role and policy:
     permissions. These are most likely not appropriate for production deployment of important applications. See the
     section Custom AWS IAM Roles and Policies for Execution for more detail.
 
-This is addressed in the `zappa_settings.json` file by setting `manage_roles` to `false` and setting the variables
-`role_name` and `role_arn` (code from the zappa readme):
+To manage IAM permissions ourselves, we:
+
+- use `zappa_settings_template.json` as a template settings file
+- use `build_zappa_settings.sh` to turn the template settings file into a real settings file; this script will:
+    - populate the `extra_permissions` key with a list of explicit permissions
+- set `manage_roles` key to `false`
+
+To create `zappa_settings.json`, run:
 
 ```
-{
-    "dev": {
-        ...
-        "manage_roles": false, // Disable Zappa client managing roles.
-        "role_name": "MyLambdaRole", // Name of your Zappa execution role. Optional, default: <project_name>-<env>-ZappaExecutionRole.
-        "role_arn": "arn:aws:iam::12345:role/app-ZappaLambdaExecutionRole", // ARN of your Zappa execution role. Optional.
-        ...
-    },
-    ...
-}
+./build_zappa_settings.sh
 ```
 
-Specific permissions can be attached (code from the zappa readme):
-
-```
-{
-    "dev": {
-        ...
-        "extra_permissions": [{ // Attach any extra permissions to this policy.
-            "Effect": "Allow",
-            "Action": ["rekognition:*"], // AWS Service ARN
-            "Resource": "*"
-        }]
-    },
-    ...
-}
-```
+---
 
 # dcp-fusillade users-groups webapp
 
+## package structure
 
+The dcp-fusillade users-group webapp is a package in the `app` folder.
+
+- `__init__.py` imports the top-level factory function, `create_app()`
+- `config.py` turns environment variables/AWS secrets into Flask config variables
+- `controllers.py` defines backend logic for interfacing with Gitlab and making branches/commits/pull requests
+- `flask_app.py` defines the flask app, its configuration, and its routes
+- `static/` and `templates/` contain files for Flask pages
+
+## entry point
+
+To run the flask app, use `run.py` in the `zappa` folder:
+
+```
+./run.py
+```
+
+This will run the Flask app locally at `http://localhost:5000`.
 
 ## deploying
 
+TBD
 
+---
 
+# faq
 
-
-## faq
-
-### what does zappa deploy do?
+## what does zappa deploy do?
 
 From the [Zappa reamde](https://github.com/Miserlou/Zappa):
 
@@ -143,7 +156,7 @@ From the [Zappa reamde](https://github.com/Miserlou/Zappa):
     resource, create WSGI-compatible routes for it, link it to the new Lambda function, and finally delete the
     archive from your S3 bucket.
 
-### what security implications does this have?
+## what security implications does this have?
 
 Zappa creates a default IAM role and policy:
 
@@ -151,48 +164,5 @@ Zappa creates a default IAM role and policy:
     permissions. These are most likely not appropriate for production deployment of important applications. See the
     section Custom AWS IAM Roles and Policies for Execution for more detail.
 
-This is addressed in the `zappa_settings.json` file by setting `manage_roles` to `false` and setting the variables
-`role_name` and `role_arn` (code from the zappa readme):
-
-```
-{
-    "dev": {
-        ...
-        "manage_roles": false, // Disable Zappa client managing roles.
-        "role_name": "MyLambdaRole", // Name of your Zappa execution role. Optional, default: <project_name>-<env>-ZappaExecutionRole.
-        "role_arn": "arn:aws:iam::12345:role/app-ZappaLambdaExecutionRole", // ARN of your Zappa execution role. Optional.
-        ...
-    },
-    ...
-}
-```
-
-Specific permissions can be attached (code from the zappa readme):
-
-```
-{
-    "dev": {
-        ...
-        "extra_permissions": [{ // Attach any extra permissions to this policy.
-            "Effect": "Allow",
-            "Action": ["rekognition:*"], // AWS Service ARN
-            "Resource": "*"
-        }]
-    },
-    ...
-}
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
+We address this by setting `manage_roles` to `false` and defining explicit permissions to give the lambda IAM user.
 
