@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}
+    <h2>Log In with Github</h2>
+
+    <p class="lead">
+    This page is for DCP operators to add DCP users (i.e., service accounts) to DCP groups.
+    </p>
+
+    <p class="lead">
+    To access this page, first log in to your Github account and grant permission for this
+    page to verify you are a member of the Human Cell Atlas organization on Github.
+    </p>
+
+    <p>
+    <div class="btn-group">
+        <a type="button" class="btn btn-secondary btn-lg" href="/login/github">
+        <i class="fa fa-github fa-2x"></i>
+        </a>
+        <a type="button" class="btn btn-secondary btn-lg" href="/login/github">
+        Log in with Github
+        </a>
+    </div>
+    </p>
+{% endblock %}

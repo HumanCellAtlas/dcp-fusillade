@@ -1,0 +1,21 @@
+{
+    "dev": {
+        "app_function": "flask_app.app",
+        "aws_region": "us-east-1",
+        "profile_name": "default",
+        "project_name": "hca-dcp-users-groups",
+        "runtime": "python3.7",
+        "s3_bucket": "zappa-tow8zwutr",
+        "role_name": "hca-dcp-users-groups-ZappaExecutionRole",
+        "manage_roles": false,
+        "extra_permissions": [],
+        "exclude": [
+            ".git",
+            "app/static",
+            "Readme.md",
+            "run.py",
+            "zappa_build_deploy_config.sh",
+            "zappa_settings_template.json"
+        ]
+    }
+}
