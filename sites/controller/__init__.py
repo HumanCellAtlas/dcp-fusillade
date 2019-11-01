@@ -120,7 +120,7 @@ class GitlabController:
                    "title": f"Request to add user to groups",
                    "remove_source_branch": True,
                    "squash": True}
-        url = f'{self.gitlab_url}/{gl_merge_path}'
+        url = f'{self.gitlab_url}{gl_merge_path}'
         headers = self.access_headers
         headers['Content-Type'] = 'application/json'
         try:
