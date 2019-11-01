@@ -20,7 +20,7 @@ def get_groups():
     group_data = json.loads(resp.text).get('groups')
     groups_in_file = []
     if group_data is not None:
-        groups_in_file = [k for k,v in group_data if k != "user_default"]
+        groups_in_file = [k for k in group_data if k != "user_default"]
     else:
         raise GitlabError("Error: could not get group info from Gitlab")
     return groups_in_file
@@ -143,7 +143,7 @@ def configure_endpoints(app):
                     # Render the index (main form)
                     try:
                         context = {"groups": get_groups()}
-                        return render_template("index.html"), 200
+                        return render_template("index.html", **context), 200
                     except GitlabError as e:
                         # To pass kwargs through to error pages, use a custom error class
                         # https://flask.palletsprojects.com/en/1.1.x/patterns/apierrors/
