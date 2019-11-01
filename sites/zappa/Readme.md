@@ -29,7 +29,7 @@ New projects run `zappa init` to create `zappa_settings.json`, but this repo has
 To generate the `zappa_settings.json`, run the script:
 
 ```
-./zappa_settings_template.json 
+./build_zappa_settings.sh
 ```
 
 This will get info about the IAM account, apply it to the IAM policy template, and generate a `zappa_settings.json`.
