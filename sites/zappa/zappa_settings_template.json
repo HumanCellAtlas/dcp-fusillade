@@ -6,6 +6,7 @@
         "project_name": "hca-dcp-fus-user-groups",
         "runtime": "python3.7",
         "s3_bucket": "",
+        "keep_warm": false,
         "role_name": "hca-dcp-fus-user-groups-ZappaExecutionRole",
         "manage_roles": false,
         "extra_permissions": [],
@@ -17,6 +18,7 @@
             "run.py",
             "zappa_build_deploy_config.sh",
             "zappa_settings_template.json"
-        ]
+        ],
+        "environment_variables": {}
     }
 }

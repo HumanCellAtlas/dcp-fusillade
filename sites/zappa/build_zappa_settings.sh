@@ -24,17 +24,26 @@ iam_policy_statement_template=$(cat $iam_policy_template | jq .Statement)
 # Step 2: substitute env vars in template
 iam_policy_statement=$(echo $iam_policy_statement_template | envsubst '$FUS_SECRETS_STORE $account_id $stage')
 # Step 3: insert into zappa settings
-cat "$zappa_settings_template" | jq ".$stage.extra_permissions = $iam_policy_statement" | sponge $zappa_settings
+cat "$zappa_settings_template" | jq ".$stage.extra_permissions = $iam_policy_statement" | sponge "$zappa_settings"
 
 # use TF Bucket for Zappa Deployments
 # TODO this might to support prefix in the bucket name...
-cat "$zappa_settings_template" | jq ".$stage.s3_bucket=\"$FUS_TERRAFORM_BACKEND_BUCKET_TEMPLATE\"" |  sponge $zappa_settings
+cat "$zappa_settings" | jq ".$stage.s3_bucket=\"$FUS_TERRAFORM_BACKEND_BUCKET_TEMPLATE\"" |  sponge "$zappa_settings"
 
 # Resource Tagging
 export DEPLOY_ORIGIN="$(whoami)-$(hostname)-$(git describe --tags --always)-$(date -u +'%Y-%m-%d-%H-%M-%S').deploy"
-cat "$zappa_settings_template" | jq ".$stage.tags.DSS_DEPLOY_ORIGIN=\"$DEPLOY_ORIGIN\" | \
+cat "$zappa_settings" | jq ".$stage.tags.DSS_DEPLOY_ORIGIN=\"$DEPLOY_ORIGIN\" | \
 	.$stage.tags.Name=\"${FUS_PROJECT_TAG}--${FUS_SERVICE_TAG}-${FUS_STAGE_TAG}\" | \
 	.$stage.tags.service=\"${FUS_SERVICE_TAG}\"  | \
 	.$stage.tags.project=\"$FUS_PROJECT_TAG\" | \
 	.$stage.tags.owner=\"${FUS_OWNER_TAG}\" | \
 	.$stage.tags.env=\"${FUS_STAGE_TAG}\""  | sponge "$zappa_settings"
+
+# Need to pop out ENV vars, and assign them to their keys, then store in env
+for ENV_KEY in $EXPORT_ENV_VARS_TO_LAMBDA; do
+	export env_val=$(printenv $ENV_KEY)
+	cat "$zappa_settings" | jq ".$stage.environment_variables.$ENV_KEY=\"$env_val\"" |  sponge "$zappa_settings"
+done
+
+#alpha sort to make easier to read.
+cat "$zappa_settings" | jq -S "." | sponge "$zappa_settings"
