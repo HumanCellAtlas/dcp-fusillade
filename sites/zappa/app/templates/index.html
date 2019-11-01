@@ -31,7 +31,10 @@
             <label for="email">
                 <p class="lead">User/Service Account Email:</p>
                 <input name="email" id="input-email" class="form-control" type="email"
-                placeholder="service-account@domain.com" size="120">
+                required="" placeholder="service-account@domain.com" size="120">
+                <div class="invalid-feedback">
+                A user/service acount email is required.
+                </div>
             </label>
 
             <hr class="mb-6">
@@ -41,8 +44,8 @@
 
             {% for group in groups %}
                 <div id="checkbox-div-{{group}}" class="custom-control custom-checkbox">
-                    <input name="{{group}}" type="checkbox" class="custom-control-input" id="checkbox-{{group}}">
-                    <label class="custom-control-label" for="select-group">{{group}}</label>
+                    <input name="{{group}}" type="checkbox" class="custom-control-input check_button" id="checkbox-{{group}}">
+                    <label class="custom-control-label" data-checked="false" for="checkbox-{{group}}">{{group}}</label>
                 </div>
                 <br />
             {% endfor %}
@@ -54,4 +57,7 @@
         </form>
 
     </div>
+{% endblock %}
+{% block script %}
+    <script src="/static/js/index.js"></script>
 {% endblock %}
