@@ -62,7 +62,6 @@ source ../../environment.local
 Env vars used include:
 
 * `FUS_DEPLOYMENT_STAGE`
-* `FUS_API_ENDPOINT`
 * `GITLAB_URL`
 * `GITLAB_PROJECT_ID`
 

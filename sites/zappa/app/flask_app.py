@@ -10,11 +10,19 @@ from .controllers import GitlabController, FileController
 gitlab = GitlabController()
 
 
+class GitlabError(Exception):
+    pass
+
+
 def get_groups():
     group_file_path = "config/groups.json"
     resp = gitlab.get_file_from_repo(group_file_path)
     group_data = json.loads(resp.text).get('groups')
-    groups_in_file = [k for k,v in group_data if k != "user_default"]
+    groups_in_file = []
+    if group_data is not None:
+        groups_in_file = [k for k,v in group_data if k != "user_default"]
+    else:
+        raise GitlabError("Error: could not get group info from Gitlab")
     return groups_in_file
 
 
@@ -88,6 +96,10 @@ def configure_error_handlers(app):
     def access_denied(error):
         return render_template("403.html"), 403
 
+    @app.errorhandler(500)
+    def internal_error(error):
+        return render_template("500.html"), 500
+
 
 def configure_logging(app):
     """Configure logging for the flask app"""
@@ -106,6 +118,9 @@ def configure_endpoints(app):
     def hello_world():
         return jsonify({"message": "Hello World!"})
 
+    # When user hits index:
+    # - if not authorized via github, show them our login page
+
     # When users hit the index,
     # - check if authorized
     #   - if not, redirect to lgoin url, taken care of by the github blueprint
@@ -114,19 +129,25 @@ def configure_endpoints(app):
     #       - if so, show them the form
     @app.route('/')
     def index():
-        # check if user is logged in, if not redirect to /login
+        # check if user is logged in, if not redirect to login landing page
         if not github.authorized:
-            return redirect(url_for("github.login"))
+            # return redirect(url_for("github.login"))
+            return render_template("login.html"), 200
     
         # check if user is in HCA github org
         resp = github.get("/user/orgs")
         if resp.ok:
             all_orgs = resp.json()
             for org in all_orgs:
-                if org['login']==GH_ORG:
+                if org['login']==app.config["GITHUB_ORG"]:
                     # Render the index (main form)
-                    context = {"groups": get_groups()}
-                    return render_template("index.html"), 200
+                    try:
+                        context = {"groups": get_groups()}
+                        return render_template("index.html"), 200
+                    except GitlabError as e:
+                        # To pass kwargs through to error pages, use a custom error class
+                        # https://flask.palletsprojects.com/en/1.1.x/patterns/apierrors/
+                        abort(500)
     
             # Not in HCA org
             abort(403)
