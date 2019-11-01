@@ -12,6 +12,7 @@
         "extra_permissions": [],
         "exclude": [
             ".git",
+            "iam",
             "Readme.md",
             "run.py",
             "build_zappa_settings.sh",
