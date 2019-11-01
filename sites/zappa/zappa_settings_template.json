@@ -19,6 +19,7 @@
             "zappa_build_deploy_config.sh",
             "zappa_settings_template.json"
         ],
-        "environment_variables": {}
+        "environment_variables": {},
+        "debug": false
     }
 }

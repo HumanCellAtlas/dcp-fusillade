@@ -39,11 +39,11 @@ cat "$zappa_settings" | jq ".$stage.tags.DSS_DEPLOY_ORIGIN=\"$DEPLOY_ORIGIN\" | 
 	.$stage.tags.owner=\"${FUS_OWNER_TAG}\" | \
 	.$stage.tags.env=\"${FUS_STAGE_TAG}\""  | sponge "$zappa_settings"
 
-# Need to pop out ENV vars, and assign them to their keys, then store in env
+# Lambda Env Variables into Config
 for ENV_KEY in $EXPORT_ENV_VARS_TO_LAMBDA; do
 	export env_val=$(printenv $ENV_KEY)
 	cat "$zappa_settings" | jq ".$stage.environment_variables.$ENV_KEY=\"$env_val\"" |  sponge "$zappa_settings"
 done
 
-#alpha sort to make easier to read.
+# Always Alpha Sort
 cat "$zappa_settings" | jq -S "." | sponge "$zappa_settings"
