@@ -12,11 +12,9 @@
         "extra_permissions": [],
         "exclude": [
             ".git",
-            "app/static",
-            "app./iam",
             "Readme.md",
             "run.py",
-            "zappa_build_deploy_config.sh",
+            "build_zappa_settings.sh",
             "zappa_settings_template.json"
         ],
         "environment_variables": {},
