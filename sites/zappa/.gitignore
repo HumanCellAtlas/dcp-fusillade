@@ -5,3 +5,4 @@
 .chalice/venv/
 chalicelib
 vendor
+zappa_settings.json

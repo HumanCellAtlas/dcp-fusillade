@@ -1,0 +1,7 @@
+include ../../../common.mk
+
+deploy:
+	# Currently not using this gcp-credential for anything
+	# aws secretsmanager get-secret-value --secret-id ${GCP_SERVICE_ACCOUNT_KEY_SECRET_ID} | jq -r .SecretString > app/gcp-credentials.json
+	./build_zappa_settings.sh
+	zappa deploy
