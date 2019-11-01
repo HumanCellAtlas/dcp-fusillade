@@ -92,7 +92,7 @@ class GitlabController:
         headers = self.access_headers
         headers['Content-Type'] = 'application/json'
         try:
-            r = requests.post(url, headers=headers, data=payload)
+            r = requests.post(url, headers=headers, data=json.dumps(payload))
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
             msg = f"Error calling Gitlab URL to commit changes: {url} "
