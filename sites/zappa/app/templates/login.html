@@ -1,4 +1,4 @@
-{% extends "template.html" %}
+{% extends "base.html" %}
 {% block title %}
     <h2>Log In with Github</h2>
 
@@ -12,9 +12,13 @@
     </p>
 
     <p>
-    <button type="button" class="btn btn-secondary btn-lg">
-    <i class="fa fa-github"></i>
-    Log in with Github
-    </button>
+    <div class="btn-group">
+        <a type="button" class="btn btn-secondary btn-lg" href="/login/github">
+        <i class="fa fa-github fa-2x"></i>
+        </a>
+        <a type="button" class="btn btn-secondary btn-lg" href="/login/github">
+        Log in with Github
+        </a>
+    </div>
     </p>
 {% endblock %}
