@@ -178,7 +178,7 @@ def configure_endpoints(app):
             context['error_message'] = "Gitlab API calls resulted in an error: %s"%(str(e))
             return render_template("failure.html", **context), 200
         except Exception as e:
-            context['error_message'] = "Encountered an error adding user to group: %s"(str(e))
+            context['error_message'] = "Encountered an error adding user to group: %s"%(str(e))
             return render_template("failure.html", **context), 200
         else:
             return render_template("success.html", **context), 200

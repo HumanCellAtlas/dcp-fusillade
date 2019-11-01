@@ -6,6 +6,7 @@ import os
 import json
 import os.path
 import requests
+from datetime import datetime
 
 from .errors import GitlabError, EnvironmentVariableError, MalformedFusilladeConfigError
 
@@ -60,7 +61,7 @@ class GitlabController:
             r = requests.post(url=url,headers=self.access_headers,params=parameters)
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            msg = f"Error calling Gitlab URL to create brach: {branch} {url}"
+            msg = f"Error calling Gitlab URL to create brach: {self._new_branch_name} {url}"
             raise GitlabError(msg)
 
     # https://docs.gitlab.com/ee/api/commits.html
