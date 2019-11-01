@@ -5,35 +5,8 @@ from flask import Flask, request, abort, jsonify, redirect, url_for, render_temp
 from flask_dance.contrib.github import make_github_blueprint, github
 
 from .config import DefaultConfig
-from .controllers import GitlabController, FileController
+from .utils import get_groups, add_user_to_group
 from .errors import GitlabError, EnvironmentVariableError, MalformedFusilladeConfigError
-
-
-gitlab = GitlabController()
-
-
-def get_groups():
-    group_file_path = "config/groups.json"
-    resp = gitlab.get_file_from_repo(group_file_path)
-    group_data = json.loads(resp.text).get('groups')
-    groups_in_file = []
-    if group_data is not None:
-        groups_in_file = [k for k in group_data if k != "user_default"]
-    else:
-        raise GitlabError("Error: could not get group info from Gitlab")
-    return groups_in_file
-
-
-def add_user_to_group(service_account:str, groups:list):
-    group_file_path = "config/groups.json"
-    resp = gitlab.get_file_from_repo(group_file_path)
-    groups_file = FileController(resp.text, group_file_path)
-    # modify groups.json file thats committed currently
-    groups_file.updated_data = groups_file.add_user_to_groups(service_account, groups)
-    # create new branch, push changes
-    gitlab.create_branch(service_account)
-    gitlab.commit_changes_(service_account,groups_file)
-    # TODO alerts
 
 
 def get_headers():
@@ -172,13 +145,13 @@ def configure_endpoints(app):
             pr_url = add_user_to_group(email, groups)
             context['pr_url'] = pr_url
         except MalformedFusilladeConfigError:
-            context['error_message'] = "Fusillade configuration file is malformed and cannot be parsed"
+            context['error_message'] = "Malformed Fusillade Error: Fusillade configuration file is malformed and cannot be parsed"
             return render_template("failure.html", **context), 200
         except GitlabError as e:
-            context['error_message'] = "Gitlab API calls resulted in an error: %s"%(str(e))
+            context['error_message'] = "Gitlab Error: Gitlab API calls resulted in an error: %s"%(str(e))
             return render_template("failure.html", **context), 200
         except Exception as e:
-            context['error_message'] = "Encountered an error adding user to group: %s"%(str(e))
+            context['error_message'] = "Error: could not add user to group: %s"%(str(e))
             return render_template("failure.html", **context), 200
         else:
             return render_template("success.html", **context), 200
