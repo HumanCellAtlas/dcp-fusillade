@@ -85,7 +85,9 @@ class GitlabController:
         return r.json()
 
     def get_gitlab_access_token(self):
-        return sm_client.get_secret_value(SecretId=).get('SecretString')
+        secret_store = os.getenv('FUS_SECRETS_STORE')
+        secret_name = os.getenv('GITLAB_ACCESS_KEY_SECRET_NAME')
+        return sm_client.get_secret_value(SecretId=f'{secret_store}/{secret_name}').get('SecretString')
 
 
     # https://docs.gitlab.com/ee/api/commits.html
