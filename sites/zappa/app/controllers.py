@@ -7,6 +7,9 @@ import json
 import os.path
 import requests
 
+from .errors import GitlabError, EnvironmentVariableError, MalformedFusilladeConfigError
+from dcplib.aws.clients import secretsmanager as sm_client  # type: ignore
+
 
 class FileController:
     def __init__(self, file_data, file_path):
@@ -22,9 +25,9 @@ class FileController:
             try:
                 assert group in modified_data.get("groups")
             except AssertionError:
-                print(f'group "{group}" not found in {modified_data.get("groups")} ')
-                continue
-            users_in_current_group = modified_data['groups'][group]['users']
+                raise MalformedFusilladeConfigError(f'group "{group}" not found in {modified_data.get("groups")} ')
+            group_data = modified_data['groups'][group]
+            users_in_current_group = group_data.get('users',[])
             if user not in users_in_current_group:
                 bisect.insort(users_in_current_group, user)
         return modified_data
@@ -37,6 +40,8 @@ class GitlabController:
         self.access_headers = {"PRIVATE-TOKEN": self.access_token}
         self.gitlab_project_id = os.getenv("GITLAB_PROJECT_ID")
         self.ci_branch = self._get_ci_branch()
+        self.timestamp = datetime.today().strftime('%Y%m%d-%H%M%S')
+        self._new_branch_name = f'{self.ci_branch}-{self.timestamp}'
 
     def get_file_from_repo(self, file_path: os.PathLike) -> requests.Response:
         """ get a file from a repo, file_path is from root of repository"""
@@ -49,15 +54,15 @@ class GitlabController:
 
     def create_branch(self,service_account_name):
         gl_branch_path = f'/projects/{self.gitlab_project_id}/repository/branches'
-        parameters = {"branch": f'{self.ci_branch}-{service_account_name}',
+        parameters = {"branch": self._new_branch_name,
                       "ref": self.ci_branch}
         url = f'{self.gitlab_url}{gl_branch_path}'
         try:
             r = requests.post(url=url,headers=self.access_headers,params=parameters)
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            print(err)
-            exit(1)
+            msg = f"Error calling Gitlab URL to create brach: {branch} {url}"
+            raise GitlabError(msg)
 
     # https://docs.gitlab.com/ee/api/commits.html
     def commit_changes_(self, service_account_name, modified_file: FileController):
@@ -68,20 +73,38 @@ class GitlabController:
                     'content': modified_file.updated_data}]
         # Note this might be able to be reduced to 1 api call to gitlab.
         # may need to set force to true.
-        payload = {'branch': f'{self.ci_branch}-{service_account_name}',
+        payload = {'branch': self._new_branch_name,
                    'commit_message': commit_message,
                    'force': True,
                    'actions':actions}
         url = f'{self.gitlab_url}{gl_commit_path}'
         headers = self.access_headers
         headers['Content-Type']= 'application/json'
-
         try:
             r = requests.post(url, headers=headers, data=json.dumps(payload))
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
             print(err)
             exit(1)
+        return r.json()
+
+    def create_merge_path(self):
+        gl_merge_path = f"/projects/{self.gitlab_project_id}/merge_requests"
+        payload = {"id": self.gitlab_project_id,
+                   "source_branch": self._new_branch_name,
+                   "target_branch": self.ci_branch,
+                   "title": f"Request to add user to groups",
+                   "remove_source_branch": True,
+                   "squash": True}
+        url = f'{self.gitlab_url}/{gl_merge_path}'
+        headers = self.access_headers
+        headers['Content-Type'] = 'application/json'
+        try:
+            r = requests.post(url, headers=headers, data=json.dumps(payload))
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            msg = f"Error calling Gitlab URL to commit changes: {url}"
+            raise GitlabError(msg)
 
     @staticmethod
     def _get_ci_branch():

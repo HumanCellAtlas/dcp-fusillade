@@ -1,17 +1,15 @@
 import os
 import json
-from flask import Flask, abort, jsonify, redirect, url_for, render_template
+import urllib
+from flask import Flask, request, abort, jsonify, redirect, url_for, render_template
 from flask_dance.contrib.github import make_github_blueprint, github
 
 from .config import DefaultConfig
 from .controllers import GitlabController, FileController
+from .errors import GitlabError, EnvironmentVariableError, MalformedFusilladeConfigError
 
 
 gitlab = GitlabController()
-
-
-class GitlabError(Exception):
-    pass
 
 
 def get_groups():
@@ -72,7 +70,7 @@ def configure_app(app):
     app.secret_key = app.config["FLASK_SECRET_KEY"]
 
     if app.secret_key == None:
-        raise Exception("Error: environment variable FLASK_SECRET_KEY not set")
+        raise EnvironmentVariableError("Error: environment variable FLASK_SECRET_KEY not set")
 
 
 def configure_blueprints(app):
@@ -155,3 +153,32 @@ def configure_endpoints(app):
         else:
             # Error with Github API
             abort(404)
+
+    @app.route("/submit", methods = ["POST"])
+    def submit():
+
+        # Extract the form data as a dictionary
+        content_types=['application/x-www-form-urlencoded'], 
+
+        form_data = request.form
+        email = form_data.get('email')
+        groups = [j for j in form_data if form_data[j]=='on']
+        context = {
+            "email": email,
+            "groups": ", ".join(groups)
+        }
+        # If add user to group fails, we try to provide the operator with some additional useful info
+        try:
+            pr_url = add_user_to_group(email, groups)
+            context['pr_url'] = pr_url
+        except MalformedFusilladeConfigError:
+            context['error_message'] = "Fusillade configuration file is malformed and cannot be parsed"
+            return render_template("failure.html", **context), 200
+        except GitlabError as e:
+            context['error_message'] = "Gitlab API calls resulted in an error: %s"%(str(e))
+            return render_template("failure.html", **context), 200
+        except Exception as e:
+            context['error_message'] = "Encountered an error adding user to group: %s"(str(e))
+            return render_template("failure.html", **context), 200
+        else:
+            return render_template("success.html", **context), 200
