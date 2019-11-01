@@ -8,7 +8,6 @@ import os.path
 import requests
 
 from .errors import GitlabError, EnvironmentVariableError, MalformedFusilladeConfigError
-from dcplib.aws.clients import secretsmanager as sm_client  # type: ignore
 
 
 class FileController:
