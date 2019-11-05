@@ -26,5 +26,6 @@ def add_user_to_group(service_account:str, groups:list):
     # create new branch, push changes
     commit_changes_json = gitlab.commit_changes_(service_account,groups_file)
     # create merge request with new branch
-    merge_request_json = gitlab.create_merge_request()
+    merge_request_result = gitlab.create_merge_request()
     # TODO alerts
+    return merge_request_result
