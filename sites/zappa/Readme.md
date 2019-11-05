@@ -22,17 +22,15 @@ To install:
 You should set up a virtual environment in the `zappa/` folder, and it should be independent of any virtual environment
 anywhere else in the dcp-fusillade repo. (This avoids installing/uploading unnecessary software packages to the lambda.)
 
-## making `zappa_settings.json`
+## zappa configuration
 
-New projects run `zappa init` to create `zappa_settings.json`, but this repo has a template version.
-
-To generate the `zappa_settings.json`, run the script:
+Zappa is configured using a JSON settings file, `zappa_settings.json`. This file is generated from the template in 
+`zappa_settings_template.json`, environment variable values in the `environment` file, and the IAM policy template
+in the `iam/` directory. This process is scripted with `make` commands. To create the zappa settings file, run:
 
 ```
-./build_zappa_settings.sh
+make
 ```
-
-This will get info about the IAM account, apply it to the IAM policy template, and generate a `zappa_settings.json`.
 
 ## stages
 
@@ -105,12 +103,6 @@ To manage IAM permissions ourselves, we:
 - use `build_zappa_settings.sh` to turn the template settings file into a real settings file; this script will:
     - populate the `extra_permissions` key with a list of explicit permissions
 - set `manage_roles` key to `false`
-
-To create `zappa_settings.json`, run:
-
-```
-./build_zappa_settings.sh
-```
 
 ---
 

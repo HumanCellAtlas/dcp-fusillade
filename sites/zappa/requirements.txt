@@ -1,3 +1,4 @@
 flask >= 1.1.1
 zappa >= 0.48
 flask-dance >= 3.0.0
+dcplib >= 3.12.0
