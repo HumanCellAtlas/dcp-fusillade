@@ -2,6 +2,7 @@ import os
 import json
 import urllib
 from flask import Flask, request, abort, jsonify, redirect, url_for, render_template
+from flaskext.markdown import Markdown
 from flask_dance.contrib.github import make_github_blueprint, github
 
 from .config import DefaultConfig
@@ -102,9 +103,8 @@ def configure_endpoints(app):
     def index():
         # check if user is logged in, if not redirect to login landing page
         if not github.authorized:
-            # return redirect(url_for("github.login"))
             return render_template("login.html"), 200
-    
+        
         # check if user is in HCA github org
         resp = github.get("/user/orgs")
         if resp.ok:
@@ -119,10 +119,8 @@ def configure_endpoints(app):
                         # To pass kwargs through to error pages, use a custom error class
                         # https://flask.palletsprojects.com/en/1.1.x/patterns/apierrors/
                         abort(500)
-    
             # Not in HCA org
             abort(403)
-    
         else:
             # Error with Github API
             abort(404)
