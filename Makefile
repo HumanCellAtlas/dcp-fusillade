@@ -3,14 +3,34 @@ SHELL:=/bin/bash
 api_gateway_id:=$(shell aws apigateway get-rest-apis | jq -r '.items[] | select(.name=="fusillade-${FUS_DEPLOYMENT_STAGE}") | .id')
 api_gateway_root_resource_id:=$(shell aws apigateway get-resources --rest-api-id $(api_gateway_id) | jq -r '.items[] | select(.path=="/") | .id')
 api_gateway_dcp_resource_id:=$(shell aws apigateway get-resources --rest-api-id $(api_gateway_id) | jq -r '.items[] | select(.path=="/dcp") | .id')
-apig-create-resource:
+
+api-create-resource:
 	aws apigateway create-resource --rest-api-id $(api_gateway_id) --parent-id $(api_gateway_root_resource_id) --path-part 'dcp'
 put-method:
 	aws apigateway put-method --rest-api-id $(api_gateway_id) --http-method GET --resource-id $(api_gateway_dcp_resource_id) --authorization-type NONE
 
-e-a:
-	echo $(api_gateway_id)
-	echo $(api_gateway_root_resource_id)
+inject-dcp-endpoint:
+	if [[ "$(api_gateway_dcp_resource_id)" == "" ]]; then \
+		echo inside; \
+		# $(MAKE) api-create-resource; \
+		# $(MAKE) put-method; \
+	else \
+		echo outside; \
+		# $(MAKE) put-method; \
+	fi; \
+
+inject-dcp-endpoint-2:
+	# used to inject `/dcp` endpoint into api-gateway
+	# check if the api-gateway has /dcp endpoint resource
+	if [[ "$(api_gateway_dcp_resource_id)" == "" ]]; then \
+		echo "inside"; \
+		# $(MAKE) api-create-resource; \
+		# $(MAKE) put-method; \
+
+	else; \
+		echo "outside" ; \
+		#$(MAKE) put-method; \
+	fi \
 
 plan-infra:
 	source ./environment && $(MAKE) -C infra plan-all
