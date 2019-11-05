@@ -142,7 +142,8 @@ def configure_endpoints(app):
         }
         # If add user to group fails, we try to provide the operator with some additional useful info
         try:
-            pr_url = add_user_to_group(email, groups)
+            merge_request_result = add_user_to_group(email, groups)
+            pr_url = merge_request_result['web_url']
             context['pr_url'] = pr_url
         except MalformedFusilladeConfigError:
             context['error_message'] = "Malformed Fusillade Error: Fusillade configuration file is malformed and cannot be parsed"
