@@ -87,7 +87,7 @@ class GitlabController:
             {
                 "action": "update",
                 "file_path": modified_file.file_path,
-                "content": json.dumps(modified_file.updated_data, indent=4),
+                "content": json.dumps(modified_file.updated_data, indent=2),
             }
         ]
         # Note this might be able to be reduced to 1 api call to gitlab.
