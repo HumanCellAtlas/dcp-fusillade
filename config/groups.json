@@ -19,6 +19,7 @@
         "bhannafi-service-account@human-cell-atlas-travis-test.iam.gserviceaccount.com",
         "chmreid@ucsc.edu",
         "dss-cli-travis-dev@human-cell-atlas-travis-test.iam.gserviceaccount.com",
+	"ingest-test@human-cell-atlas-travis-test.iam.gserviceaccount.com",
         "gpelayo1@ucsc.edu",
         "lblauvel-service-account@human-cell-atlas-travis-test.iam.gserviceaccount.com",
         "lblauvel@ucsc.edu",
