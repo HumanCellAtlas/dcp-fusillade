@@ -161,29 +161,22 @@ def configure_endpoints(app):
                 groups = [j for j in form_data if form_data[j] == "on"]
                 context = {"email": email, "groups": ", ".join(groups)}
 
-                ## If add user to group fails, we try to provide the operator with some additional useful info
-                # try:
-                #    merge_request_result = add_user_to_group(email, groups)
-                #    pr_url = merge_request_result['web_url']
-                #    context['pr_url'] = pr_url
-                # except MalformedFusilladeConfigError:
-                #    context['error_message'] = "Malformed Fusillade Error: Fusillade configuration file is malformed and cannot be parsed"
-                #    return render_template("failure.html", **context), 200
-                # except GitlabError as e:
-                #    context['error_message'] = "Gitlab Error: Gitlab API calls resulted in an error: %s"%(str(e))
-                #    return render_template("failure.html", **context), 200
-                # except Exception as e:
-                #    context['error_message'] = "Error: could not add user to group: %s"%(str(e))
-                #    return render_template("failure.html", **context), 200
-                # else:
-                #    return render_template("success.html", **context), 200
-
-                context['pr_url'] = 'http://localhost'
-                return render_template("success.html", **context), 200
-
-                #context["error_message"] = "Error: cannot do anything right"
-                #return render_template("failure.html", **context), 200
-
+                # If add user to group fails, we try to provide the operator with some additional useful info
+                try:
+                    merge_request_result = add_user_to_group(email, groups)
+                    pr_url = merge_request_result['web_url']
+                    context['pr_url'] = pr_url
+                except MalformedFusilladeConfigError:
+                    context['error_message'] = "Malformed Fusillade Error: Fusillade configuration file is malformed and cannot be parsed"
+                    return render_template("failure.html", **context), 200
+                except GitlabError as e:
+                    context['error_message'] = "Gitlab Error: Gitlab API calls resulted in an error: %s"%(str(e))
+                    return render_template("failure.html", **context), 200
+                except Exception as e:
+                    context['error_message'] = "Error: could not add user to group: %s"%(str(e))
+                    return render_template("failure.html", **context), 200
+                else:
+                    return render_template("success.html", **context), 200
             else:
                 # Not in HCA org
                 abort(403)
