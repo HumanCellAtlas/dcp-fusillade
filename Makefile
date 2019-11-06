@@ -1,36 +1,34 @@
 SHELL:=/bin/bash
 
+account_id:=$(aws sts  get-caller-identity |  jq -r  '.Account')
 api_gateway_id:=$(shell aws apigateway get-rest-apis | jq -r '.items[] | select(.name=="fusillade-${FUS_DEPLOYMENT_STAGE}") | .id')
 api_gateway_root_resource_id:=$(shell aws apigateway get-resources --rest-api-id $(api_gateway_id) | jq -r '.items[] | select(.path=="/") | .id')
 api_gateway_dcp_resource_id:=$(shell aws apigateway get-resources --rest-api-id $(api_gateway_id) | jq -r '.items[] | select(.path=="/dcp") | .id')
+deployed_lambda_arn:=$(shell aws lambda get-function-configuration --function-name ${DCP_LAMBDA_NAME} | jq -r ".FunctionArn")
+
 
 api-create-resource:
-	aws apigateway create-resource --rest-api-id $(api_gateway_id) --parent-id $(api_gateway_root_resource_id) --path-part 'dcp'
+	aws apigateway create-resource --rest-api-id $(api_gateway_id) --parent-id $(api_gateway_root_resource_id) --path '/dcp' --path-part "dcp"
 put-method:
-	aws apigateway put-method --rest-api-id $(api_gateway_id) --http-method GET --resource-id $(api_gateway_dcp_resource_id) --authorization-type NONE
+	aws apigateway put-method --rest-api-id $(api_gateway_id) --http-method ANY --resource-id $(api_gateway_dcp_resource_id) --authorization-type NONE
+put-integration:
+	aws apigateway put-integration --region ${AWS_DEFAULT_REGION} --rest-api-id $(api_gateway_id) --resource-id $(api_gateway_dcp_resource_id)  --http-method ANY --type AWS_PROXY --integration-http-method POST\
+	--uri "arn:aws:apigateway:${AWS_DEFAULT_REGION}:lambda:path//2015-03-31/functions/$(deployed_lambda_arn)/invocations" --credentials
 
 inject-dcp-endpoint:
 	if [[ "$(api_gateway_dcp_resource_id)" == "" ]]; then \
 		echo inside; \
-		# $(MAKE) api-create-resource; \
-		# $(MAKE) put-method; \
+		$(MAKE) api-create-resource; \
+		$(MAKE) put-method; \
+		$(MAKE) put-integration; \
 	else \
 		echo outside; \
-		# $(MAKE) put-method; \
+		$(MAKE) put-method; \
+		$(MAKE) put-integration; \
 	fi; \
 
-inject-dcp-endpoint-2:
-	# used to inject `/dcp` endpoint into api-gateway
-	# check if the api-gateway has /dcp endpoint resource
-	if [[ "$(api_gateway_dcp_resource_id)" == "" ]]; then \
-		echo "inside"; \
-		# $(MAKE) api-create-resource; \
-		# $(MAKE) put-method; \
-
-	else; \
-		echo "outside" ; \
-		#$(MAKE) put-method; \
-	fi \
+deploy-zappa:
+	$(MAKE) -C sites/zappa deploy
 
 plan-infra:
 	source ./environment && $(MAKE) -C infra plan-all

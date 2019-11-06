@@ -48,6 +48,7 @@ FUS_API_ENDPOINT="https://auth.$FUS_DEPLOYMENT_STAGE.data.humancellatlas.org"
 GITLAB_URL="https://allspark.dev.data.humancellatlas.org"
 GITLAB_PROJECT_ID="76"
 GITLAB_ACCESS_KEY_SECRET_NAME="gitlab-pr-access-key"
+DCP_LAMBDA_NAME="dcp-fus-user-groups-${FUS_DEPLOYMENT_STAGE}"
 
 
 set +a

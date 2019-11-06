@@ -1,14 +1,13 @@
 {
     "dev": {
         "app_function": "flask_app.app",
+        "apigateway_enabled": false,
         "aws_region": "us-east-1",
         "profile_name": "default",
-        "project_name": "hca-dcp-fus-user-groups",
+        "project_name": "dcp-fus-user-groups",
         "runtime": "python3.7",
         "s3_bucket": "",
         "keep_warm": false,
-        "role_name": "hca-dcp-fus-user-groups-ZappaExecutionRole",
-        "manage_roles": false,
         "extra_permissions": [],
         "exclude": [
             ".git",

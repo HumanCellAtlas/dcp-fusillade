@@ -38,7 +38,6 @@ terraform_providers_template = """# Auto-generated during infra build process.
 provider aws {{
   region = "{aws_region}"
 }}
-
 provider google {{
   project = "{gcp_project_id}"
 }}

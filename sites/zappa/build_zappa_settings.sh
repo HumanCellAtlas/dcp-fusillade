@@ -7,17 +7,19 @@
 
 set -euo pipefail
 
-if [[ -z ${FUS_STAGE_TAG+foo} ]]; then
+if [[ -z ${FUS_STAGE_TAG} ]]; then
     echo 'Please run "source environment" in the dcp-fusillade repo root directory before running this command'
     exit 1
 fi
 
 export stage=$FUS_STAGE_TAG
 export account_id=$(aws sts get-caller-identity | jq -r .Account)
+export lambda_name=$DCP_LAMBDA_NAME
 
 zappa_settings="$(dirname $0)/zappa_settings.json"
 zappa_settings_template="$(dirname $0)/zappa_settings_template.json"
 iam_policy_template="$(dirname $0)/iam/policy-templates/dcp-fus-lambda.json"
+
 
 # Step 1: extract "Statement" from IAM policy template
 iam_policy_statement_template=$(cat $iam_policy_template | jq .Statement)
@@ -25,6 +27,10 @@ iam_policy_statement_template=$(cat $iam_policy_template | jq .Statement)
 iam_policy_statement=$(echo $iam_policy_statement_template | envsubst '$FUS_SECRETS_STORE $account_id $stage')
 # Step 3: insert into zappa settings
 cat "$zappa_settings_template" | jq ".$stage.extra_permissions = $iam_policy_statement" | sponge "$zappa_settings"
+
+# project name must include stage - this caused bug with name having 2 stages, zappa might be modifying this for us.
+# cat "$zappa_settings" | jq ".$stage.project_name=\"$lambda_name\"" |  sponge "$zappa_settings"
+
 
 # use TF Bucket for Zappa Deployments
 # TODO this might to support prefix in the bucket name...
