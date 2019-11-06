@@ -15,11 +15,10 @@ def get_headers():
     return {"Content-Type": "text/html", "Access-Control-Allow-Origin": "*"}
 
 
-def create_app():
+def create_app(test_config=None):
     """App factory method, see http://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/"""
-    # app = Flask(__name__)
     app = Flask(__name__, template_folder="templates", static_folder="static")
-    configure_app(app)
+    configure_app(app, test_config)
     configure_extensions(app)
     configure_blueprints(app)
     configure_error_handlers(app)
@@ -27,16 +26,19 @@ def create_app():
     return app
 
 
-def configure_app(app):
+def configure_app(app, test_config):
     """Set flask app configuration"""
 
     # Set config variables using an object
     # http://flask.pocoo.org/docs/api/#configuration
     app.config.from_object(DefaultConfig)
 
-    # Set config variables using a python file
-    # http://flask.pocoo.org/docs/config/#instance-folders
-    app.config.from_pyfile('production.cfg', silent=True)
+    if test_config is not None:
+        app.config.update(test_config)
+    else:
+        # load the instance config, if it exists, when not testing
+        stage = os.environ.get('FUS_DEPLOYMENT_STAGE')
+        app.config.from_pyfile(f"{stage}.cfg", silent=True)
 
     # Set this if behind a TLS/HTTPS proxy
     # app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -49,7 +51,7 @@ def configure_app(app):
 
 
 def configure_extensions(app):
-    Markdown(app, extensions=['fenced_code'])
+    Markdown(app, extensions=["fenced_code"])
 
 
 def configure_blueprints(app):
@@ -58,7 +60,7 @@ def configure_blueprints(app):
     # Apply flask-dance Github OAuth blueprint; client id and secret are already set in app.config
     github_bp = make_github_blueprint(scope="read:org")
     app.register_blueprint(github_bp, url_prefix="/login")
-    
+
 
 def configure_error_handlers(app):
     """Configure error handlers for flask app"""
@@ -85,17 +87,26 @@ def configure_logging(app):
         return
 
     import logging
+
     app.logger.setLevel(logging.INFO)
 
 
+def check_user_in_org(user_orgs_resp, org_name):
+    # check if user is in HCA github org
+    all_orgs = user_orgs_resp.json()
+    for org in all_orgs:
+        if org["login"] == org_name:
+            return True
+    return False
+
 def configure_endpoints(app):
-    
+
     flask_root = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
-    # Simple hello world endpoint to test things out
-    @app.route('/hello')
+    # Simple ping endpoint
+    @app.route("/ping")
     def hello_world():
-        return jsonify({"message": "Hello World!"})
+        return jsonify({"message": "pong"})
 
     # When user hits index:
     # - if not authorized via github, show them our login page
@@ -106,63 +117,82 @@ def configure_endpoints(app):
     #   - if so, use the github object to call github api directly, check if user is in org
     #       - if not, 403 access denied
     #       - if so, show them the form
-    @app.route('/')
+    @app.route("/")
     def index():
         # check if user is logged in, if not redirect to login landing page
         if not github.authorized:
             return render_template("login.html"), 200
-        
-        # check if user is in HCA github org
+
         resp = github.get("/user/orgs")
+        print(resp)
+
         if resp.ok:
-            all_orgs = resp.json()
-            for org in all_orgs:
-                if org['login']==app.config["GITHUB_ORG"]:
-                    # Render the index (main form)
-                    try:
-                        context = {"groups": get_groups()}
-                        return render_template("index.html", **context), 200
-                    except GitlabError as e:
-                        # To pass kwargs through to error pages, use a custom error class
-                        # https://flask.palletsprojects.com/en/1.1.x/patterns/apierrors/
-                        abort(500)
-            # Not in HCA org
-            abort(403)
+            if check_user_in_org(resp, app.config["GITHUB_ORG"]):
+                try:
+                    context = {"groups": get_groups()}
+                    return render_template("index.html", **context), 200
+                except GitlabError as e:
+                    # To pass kwargs through to error pages, use a custom error class
+                    # https://flask.palletsprojects.com/en/1.1.x/patterns/apierrors/
+                    abort(500)
+            else:
+                # Not in HCA org
+                abort(403)
         else:
             # Error with Github API
             abort(404)
 
-    @app.route("/submit", methods = ["POST"])
+
+    @app.route("/submit", methods=["POST"])
     def submit():
 
-        # Extract the form data as a dictionary
-        content_types=['application/x-www-form-urlencoded'], 
+        # check if user is logged in, if not redirect to login landing page
+        if not github.authorized:
+            return render_template("login.html"), 200
 
-        form_data = request.form
-        email = form_data.get('email')
-        groups = [j for j in form_data if form_data[j]=='on']
-        context = {
-            "email": email,
-            "groups": ", ".join(groups)
-        }
-        # If add user to group fails, we try to provide the operator with some additional useful info
-        try:
-            merge_request_result = add_user_to_group(email, groups)
-            pr_url = merge_request_result['web_url']
-            context['pr_url'] = pr_url
-        except MalformedFusilladeConfigError:
-            context['error_message'] = "Malformed Fusillade Error: Fusillade configuration file is malformed and cannot be parsed"
-            return render_template("failure.html", **context), 200
-        except GitlabError as e:
-            context['error_message'] = "Gitlab Error: Gitlab API calls resulted in an error: %s"%(str(e))
-            return render_template("failure.html", **context), 200
-        except Exception as e:
-            context['error_message'] = "Error: could not add user to group: %s"%(str(e))
-            return render_template("failure.html", **context), 200
+        resp = github.get("/user/orgs")
+        if resp.ok:
+            if check_user_in_org(resp, app.config["GITHUB_ORG"]):
+                # Extract the form data as a dictionary
+                content_types = (["application/x-www-form-urlencoded"],)
+
+                form_data = request.form
+                email = form_data.get("email")
+                groups = [j for j in form_data if form_data[j] == "on"]
+                context = {"email": email, "groups": ", ".join(groups)}
+
+                ## If add user to group fails, we try to provide the operator with some additional useful info
+                # try:
+                #    merge_request_result = add_user_to_group(email, groups)
+                #    pr_url = merge_request_result['web_url']
+                #    context['pr_url'] = pr_url
+                # except MalformedFusilladeConfigError:
+                #    context['error_message'] = "Malformed Fusillade Error: Fusillade configuration file is malformed and cannot be parsed"
+                #    return render_template("failure.html", **context), 200
+                # except GitlabError as e:
+                #    context['error_message'] = "Gitlab Error: Gitlab API calls resulted in an error: %s"%(str(e))
+                #    return render_template("failure.html", **context), 200
+                # except Exception as e:
+                #    context['error_message'] = "Error: could not add user to group: %s"%(str(e))
+                #    return render_template("failure.html", **context), 200
+                # else:
+                #    return render_template("success.html", **context), 200
+
+                context['pr_url'] = 'http://localhost'
+                return render_template("success.html", **context), 200
+
+                #context["error_message"] = "Error: cannot do anything right"
+                #return render_template("failure.html", **context), 200
+
+            else:
+                # Not in HCA org
+                abort(403)
         else:
-            return render_template("success.html", **context), 200
+            # Error with Github API
+            abort(404)
 
-    @app.route('/faq')
+
+    @app.route("/faq")
     def faq():
         with open(os.path.join(flask_root, "templates", "faq.md"), "r") as f:
             context = dict(markdown_body=f.read())
