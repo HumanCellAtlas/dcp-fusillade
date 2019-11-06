@@ -20,6 +20,7 @@ def create_app():
     # app = Flask(__name__)
     app = Flask(__name__, template_folder="templates", static_folder="static")
     configure_app(app)
+    configure_extensions(app)
     configure_blueprints(app)
     configure_error_handlers(app)
     configure_endpoints(app)
@@ -45,6 +46,10 @@ def configure_app(app):
 
     if app.secret_key == None:
         raise EnvironmentVariableError("Error: environment variable FLASK_SECRET_KEY not set")
+
+
+def configure_extensions(app):
+    Markdown(app, extensions=['fenced_code'])
 
 
 def configure_blueprints(app):
@@ -84,6 +89,8 @@ def configure_logging(app):
 
 
 def configure_endpoints(app):
+    
+    flask_root = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
     # Simple hello world endpoint to test things out
     @app.route('/hello')
@@ -154,3 +161,9 @@ def configure_endpoints(app):
             return render_template("failure.html", **context), 200
         else:
             return render_template("success.html", **context), 200
+
+    @app.route('/faq')
+    def faq():
+        with open(os.path.join(flask_root, "templates", "faq.md"), "r") as f:
+            context = dict(markdown_body=f.read())
+        return render_template("faq.html", **context), 200
