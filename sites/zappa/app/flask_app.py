@@ -6,7 +6,7 @@ from flaskext.markdown import Markdown
 from flask_dance.contrib.github import make_github_blueprint, github
 
 from .config import DefaultConfig
-from .utils import get_groups, add_user_to_group
+from .utils import get_groups_from_gitlab, add_user_to_group_merge_request
 from .errors import GitlabError, EnvironmentVariableError, MalformedFusilladeConfigError
 
 
@@ -51,6 +51,7 @@ def configure_app(app, test_config):
 
 
 def configure_extensions(app):
+    """Add Flask extensions for enhanced functionality"""
     Markdown(app, extensions=["fenced_code"])
 
 
@@ -87,12 +88,11 @@ def configure_logging(app):
         return
 
     import logging
-
     app.logger.setLevel(logging.INFO)
 
 
 def check_user_in_org(user_orgs_resp, org_name):
-    # check if user is in HCA github org
+    """Given a response from github.get("/user/orgs"), determine if the user is in an organization"""
     all_orgs = user_orgs_resp.json()
     for org in all_orgs:
         if org["login"] == org_name:
@@ -100,25 +100,22 @@ def check_user_in_org(user_orgs_resp, org_name):
     return False
 
 def configure_endpoints(app):
+    """Configure all endpoints for our flask app"""
 
     flask_root = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
     # Simple ping endpoint
     @app.route("/ping")
-    def hello_world():
+    def ping():
         return jsonify({"message": "pong"})
 
     # When user hits index:
     # - if not authorized via github, show them our login page
-
-    # When users hit the index,
-    # - check if authorized
-    #   - if not, redirect to lgoin url, taken care of by the github blueprint
-    #   - if so, use the github object to call github api directly, check if user is in org
-    #       - if not, 403 access denied
-    #       - if so, show them the form
+    # - if member of HCA, show them the form
+    # - otherwise show them 403
     @app.route("/")
     def index():
+        """Ask non-authenticated users to log in via github, redirect users who are in HCA to form"""
         # check if user is logged in, if not redirect to login landing page
         if not github.authorized:
             return render_template("login.html"), 200
@@ -129,7 +126,7 @@ def configure_endpoints(app):
         if resp.ok:
             if check_user_in_org(resp, app.config["GITHUB_ORG"]):
                 try:
-                    context = {"groups": get_groups()}
+                    context = {"groups": get_groups_from_gitlab()}
                     return render_template("index.html", **context), 200
                 except GitlabError as e:
                     # To pass kwargs through to error pages, use a custom error class
@@ -142,9 +139,9 @@ def configure_endpoints(app):
             # Error with Github API
             abort(404)
 
-
     @app.route("/submit", methods=["POST"])
     def submit():
+        """Endpoint for when the user submits the form"""
 
         # check if user is logged in, if not redirect to login landing page
         if not github.authorized:
@@ -163,7 +160,7 @@ def configure_endpoints(app):
 
                 # If add user to group fails, we try to provide the operator with some additional useful info
                 try:
-                    merge_request_result = add_user_to_group(email, groups)
+                    merge_request_result = add_user_to_group_merge_request(email, groups)
                     pr_url = merge_request_result['web_url']
                     context['pr_url'] = pr_url
                 except MalformedFusilladeConfigError:
@@ -187,6 +184,7 @@ def configure_endpoints(app):
 
     @app.route("/faq")
     def faq():
+        """Endpoint for static page of text describing the webapp"""
         with open(os.path.join(flask_root, "templates", "faq.md"), "r") as f:
             context = dict(markdown_body=f.read())
         return render_template("faq.html", **context), 200
