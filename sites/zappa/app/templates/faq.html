@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}
+<h2>Frequently Asked Questions</h2>
+{% endblock %}
+{% block content %}
+<div class="row text-left">
+{{markdown_body|markdown}}
+</div>
+{% endblock %}
