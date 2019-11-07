@@ -24,6 +24,8 @@ class FileController:
         """returns a new group_dictionary with user added into requested groups"""
         modified_data = copy.deepcopy(self.group_data)
         for group in groups:
+
+            # Before we get the group key or the users key, make sure they are present
             try:
                 assert group in modified_data.get("groups")
             except AssertionError:
@@ -31,9 +33,19 @@ class FileController:
                     f'group "{group}" not found in {modified_data.get("groups")} '
                 )
             group_data = modified_data["groups"][group]
-            users_in_current_group = group_data.get("users", [])
+            try:
+                assert "users" in group_data
+            except AssertionError:
+                group_data['users'] = []
+            users_in_current_group = group_data["users"]
+
+            # Insert the user into the users list
             if user not in users_in_current_group:
                 bisect.insort(users_in_current_group, user)
+
+            # Update modified copy
+            modified_data["groups"][group]["users"] = users_in_current_group
+
         return modified_data
 
 
@@ -87,7 +99,7 @@ class GitlabController:
             {
                 "action": "update",
                 "file_path": modified_file.file_path,
-                "content": json.dumps(modified_file.updated_data, indent=4),
+                "content": json.dumps(modified_file.updated_data, indent=2),
             }
         ]
         # Note this might be able to be reduced to 1 api call to gitlab.

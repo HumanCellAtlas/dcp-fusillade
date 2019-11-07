@@ -5,7 +5,8 @@ from .controllers import GitlabController, FileController
 gitlab = GitlabController()
 
 
-def get_groups():
+def get_groups_from_gitlab() -> list:
+    """Use the Gitlab API to get the Fusillade groups config file from the dcp-fusillade repo"""
     group_file_path = "config/groups.json"
     resp = gitlab.get_file_from_repo(group_file_path)
     group_data = json.loads(resp.text).get('groups')
@@ -17,7 +18,8 @@ def get_groups():
     return groups_in_file
 
 
-def add_user_to_group(service_account:str, groups:list):
+def add_user_to_group_merge_request(service_account: str, groups: list) -> dict:
+    """Open a merge request in Gitlab that will add the given user to the given groups"""
     group_file_path = "config/groups.json"
     resp = gitlab.get_file_from_repo(group_file_path)
     groups_file = FileController(resp.text, group_file_path)
@@ -26,5 +28,6 @@ def add_user_to_group(service_account:str, groups:list):
     # create new branch, push changes
     commit_changes_json = gitlab.commit_changes_(service_account,groups_file)
     # create merge request with new branch
-    merge_request_json = gitlab.create_merge_request()
+    merge_request_result = gitlab.create_merge_request()
     # TODO alerts
+    return merge_request_result

@@ -12,9 +12,10 @@
         "exclude": [
             ".git",
             "iam",
-            "Readme.md",
-            "run.py",
+            "tests",
             "build_zappa_settings.sh",
+            "run.py",
+            "Readme.md",
             "zappa_settings_template.json"
         ],
         "environment_variables": {},

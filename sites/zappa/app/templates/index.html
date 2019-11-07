@@ -1,30 +1,27 @@
 {% extends "base.html" %}
 {% block title %}
-    <h2>Link User to Group</h2>
+    <h2>DCP Fusillade: Link a User to Group(s)</h2>
     
-    <p class="lead">
+    <p>
     This form should be used by DCP operators to add DCP users (i.e., service accounts) to DCP groups.
+    This is required for access control in the Human Cell Atlas (HCA) project.
     </p>
     
-    <p class="lead">
-    Enter the email address for the user or service account, and check the boxes of any groups to which
-    the user should be added.
+    <p>
+    Enter the email address for a user (service account), and check the boxes of any groups to which
+    the user should be added. If a user is already in a group, and that group's checkbox is unchecked,
+    they will not be removed from that group.
     </p>
     
-    <p class="lead">This form is ADD-ONLY and will NOT remove users from a group. If a user is already
-    in a group, and that group's checkbox is unchecked, they will NOT be removed from that group.
-    </p>
-    
-    <p class="lead">When you submit your request, a pull request will be created in the
+    <p>Submitting this form will open a pull request in the
     <a href="https://allspark.dev.data.humancellatlas.org/HumanCellAtlas/dcp-fusillade">dcp-fusillade</a> 
-    repository on <a href="https://allspark.dev.data.humancellatlas.org">Allspark</a> 
-    to modify the DCP Fusillade configuration files.
-    Once the pull request is approved, changes will be applied by the dcp-fusillade
-    continuous integration system.
+    repository on <a href="https://allspark.dev.data.humancellatlas.org">Allspark</a>.
+    Once the pull request is approved, the changes will be implemented by the continuous
+    integration/deployment system.
     </p>
 {% endblock %}
 {% block content %}
-    <div class="col-md-4 order-md-2">
+    <div class="col-md-4 order-md-2 offset-4">
 
         <form method="POST" action="/submit">
 
@@ -57,7 +54,4 @@
         </form>
 
     </div>
-{% endblock %}
-{% block script %}
-    <script src="/static/js/index.js"></script>
 {% endblock %}
