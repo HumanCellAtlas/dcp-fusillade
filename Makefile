@@ -8,12 +8,19 @@ deployed_lambda_arn:=$(shell aws lambda get-function-configuration --function-na
 
 
 api-create-resource:
-	aws apigateway create-resource --rest-api-id $(api_gateway_id) --parent-id $(api_gateway_root_resource_id) --path '/dcp' --path-part "dcp"
+	aws apigateway create-resource --rest-api-id $(api_gateway_id) --parent-id $(api_gateway_root_resource_id) --path 'dcp' --path-part "dcp"
 put-method:
 	aws apigateway put-method --rest-api-id $(api_gateway_id) --http-method ANY --resource-id $(api_gateway_dcp_resource_id) --authorization-type NONE
 put-integration:
-	aws apigateway put-integration --region ${AWS_DEFAULT_REGION} --rest-api-id $(api_gateway_id) --resource-id $(api_gateway_dcp_resource_id)  --http-method ANY --type AWS_PROXY --integration-http-method POST\
-	--uri "arn:aws:apigateway:${AWS_DEFAULT_REGION}:lambda:path//2015-03-31/functions/$(deployed_lambda_arn)/invocations" --credentials
+	aws apigateway put-integration --region ${AWS_DEFAULT_REGION} --rest-api-id $(api_gateway_id) --resource-id $(api_gateway_dcp_resource_id)  --http-method ANY --type AWS_PROXY --integration-http-method POST  --uri 'arn:aws:apigateway:${AWS_DEFAULT_REGION}:lambda:path/2015-03-31/functions/$(deployed_lambda_arn)/invocations'
+put-api-response:
+	aws apigateway put-method-response --rest-api-id $(api_gateway_id) --resource-id $(api_gateway_dcp_resource_id) --http-method ANY --status-code 200 --response-models application/json=Empty
+put-lambda-response:
+	aws apigateway put-integration-response --rest-api-id $(api_gateway_id) --resource-id $(api_gateway_dcp_resource_id) --http-method ANY --status-code 200 --response-templates application/json=""
+put-lambda-permission:
+	aws lambda add-permission --function-name ${DCP_LAMBDA_NAME} --action lambda:InvokeFunction --principal apigateway.amazonaws.com --source-arn "arn:aws:execute-api:${AWS_DEFAULT_REGION}:$(account_id):$(api_gateway_id)/${FUS_DEPLOYMENT_STAGE}/POST/dcp" --statement-id dcp-fus-${FUS_DEPLOYMENT_STAGE}
+deploy-api:
+	aws apigateway create-deployment --region ${AWS_DEFAULT_REGION} --rest-api-id $(api_gateway_id) --stage-name ${FUS_DEPLOYMENT_STAGE}
 
 inject-dcp-endpoint:
 	if [[ "$(api_gateway_dcp_resource_id)" == "" ]]; then \
@@ -21,10 +28,18 @@ inject-dcp-endpoint:
 		$(MAKE) api-create-resource; \
 		$(MAKE) put-method; \
 		$(MAKE) put-integration; \
+		$(MAKE) put-api-response; \
+		$(MAKE) put-lambda-response; \
+		$(MAKE) put-lambda-permission; \
+		$(MAKE) deploy-api; \
 	else \
 		echo outside; \
 		$(MAKE) put-method; \
 		$(MAKE) put-integration; \
+		$(MAKE) put-api-response; \
+		$(MAKE) put-lambda-response; \
+		$(MAKE) put-lambda-permission; \
+		$(MAKE) deploy-api; \
 	fi; \
 
 deploy-zappa:
