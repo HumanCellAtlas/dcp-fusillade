@@ -3,6 +3,9 @@ SHELL:=/bin/bash
 deploy-zappa:
 	$(MAKE) -C sites/zappa deploy
 
+apigateway:
+	$(MAKE) -C sites/zappa apigateway
+
 plan-infra:
 	source ./environment && $(MAKE) -C infra plan-all
 

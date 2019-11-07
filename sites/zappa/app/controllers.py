@@ -7,11 +7,10 @@ import os
 import json
 import os.path
 import requests
-
+import boto3
 from .errors import GitlabError, EnvironmentVariableError, MalformedFusilladeConfigError
 
-from dcplib.aws.clients import secretsmanager as sm_client  # type: ignore
-
+sm_client = boto3.client('secretsmanager')
 
 class FileController:
     def __init__(self, file_data, file_path):

@@ -4,3 +4,6 @@ deploy:
 	./build_zappa_settings.sh
 	zappa update
 	python inject-apig.py
+
+apigateway:
+	python inject-apig.py

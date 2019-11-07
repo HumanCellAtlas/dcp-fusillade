@@ -1,6 +1,6 @@
 {
     "dev": {
-        "app_function": "flask_app.app",
+        "app_function": "run.app",
         "apigateway_enabled": false,
         "aws_region": "us-east-1",
         "profile_name": "default",
@@ -14,7 +14,6 @@
             "iam",
             "tests",
             "build_zappa_settings.sh",
-            "run.py",
             "Readme.md",
             "zappa_settings_template.json"
         ],

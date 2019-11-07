@@ -2,8 +2,7 @@
 #
 # Main entry point for the zappa app
 
-import os
-from app import create_app
+from .app import create_app
 
 app = create_app()
 

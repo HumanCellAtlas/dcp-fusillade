@@ -1,7 +1,8 @@
 import os
 
-from dcplib.aws.clients import secretsmanager as sm_client  # type: ignore
+import boto3
 
+sm_client = boto3.client('secretsmanager')
 
 def get_seceret(self, secret_id: str):
     """returns secret string from AWS Secrets Manager"""
@@ -16,7 +17,8 @@ class BaseConfig(object):
 
      # SSM
     SECRET_STORE = os.getenv('FUS_SECRETS_STORE')
-    secret_name = os.getenv('GITLAB_ACCESS_KEY_SECRET_NAME')
+    gitlab_token_secret_name = os.getenv('GITLAB_ACCESS_KEY_SECRET_NAME')
+
 
     # flask
     FLASK_SECRET_KEY = os.environ["FLASK_SECRET_KEY"]
@@ -30,7 +32,7 @@ class BaseConfig(object):
     # gitlab sensitive info
     GITLAB_URL = os.environ.get("GITLAB_URL")
     GITLAB_PID = os.environ.get("GITLAB_RPOJECT_ID")
-    GITLAB_TOKEN = get_seceret(f"{SECRET_STORE}/{secret_name}")
+    GITLAB_TOKEN = get_seceret(f"{SECRET_STORE}/{gitlab_token_secret_name}")
 
 
 class DefaultConfig(BaseConfig):
