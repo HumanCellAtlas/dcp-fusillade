@@ -17,13 +17,13 @@ class BaseConfig(object):
     - GITHUB_ORG: the name of the Github org whose membership allows access
 
     These variables will be available via the webapp configuration:
-    - STAGE
+    - FUS_DEPLOYMENT_STAGE
     - GITLAB_API_URL
     - GITLAB_PROJECT_ID
     - GITHUB_ORG
     """
     def __init__(self):
-        self.STAGE = os.environ["FUS_DEPLOYMENT_STAGE"]
+        self.FUS_DEPLOYMENT_STAGE = os.environ["FUS_DEPLOYMENT_STAGE"]
 
         # Gitlab things
         self.GITLAB_API_URL = os.environ["GITLAB_API_URL"]
@@ -113,7 +113,7 @@ class LiveConfig(BaseConfig):
     def GITLAB_API_TOKEN(self):
         """Retrieve the Gitlab access token from AWS secrets manager (cached)"""
         token_sec_name = os.environ['GITLAB_API_TOKEN_SECRET_NAME']
-        secret_name = f"{self.STORE}/{self.STAGE}/{token_sec_name}"
+        secret_name = f"{self.STORE}/{self.FUS_DEPLOYMENT_STAGE}/{token_sec_name}"
         return get_secret(secret_name)
 
     # Flask and Github things are packed into the WEBAPP_STASH secret
@@ -122,7 +122,7 @@ class LiveConfig(BaseConfig):
     def WEBAPP_STASH(self):
         """Retrieves the Flask/Github OAuth secrets from the AWS secrets manager (cached)"""
         stash_sec_name = os.environ['WEBAPP_SECRET_STASH_NAME']
-        secret_name = f"{self.STORE}/{self.STAGE}/{stash_sec_name}"
+        secret_name = f"{self.STORE}/{self.FUS_DEPLOYMENT_STAGE}/{stash_sec_name}"
         return json.loads(get_secret(secret_name))
 
     @property

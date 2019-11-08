@@ -1,7 +1,8 @@
 import os
 import json
 import urllib
-from flask import Flask, request, abort, jsonify, redirect, url_for, render_template
+import requests
+from flask import Flask, current_app, request, abort, jsonify, redirect, url_for, render_template
 from flaskext.markdown import Markdown
 from flask_dance.contrib.github import make_github_blueprint, github
 
@@ -128,11 +129,16 @@ def configure_endpoints(app):
         if not github.authorized:
             return render_template("login.html"), 200
 
-        resp = github.get("/user/orgs")
+        try:
+            resp = github.get("/user/orgs")
+        except requests.exceptions.ConnectionError:
+            # Error with Github API
+            abort(404)
+
         if resp.ok:
             if check_user_in_org(resp.json(), github_org):
                 try:
-                    context = {"groups": get_groups_from_gitlab(app.config)}
+                    context = {"groups": get_groups_from_gitlab(current_app.config)}
                     return render_template("index.html", **context), 200
                 except GitlabError as e:
                     # To pass kwargs through to error pages, use a custom error class
@@ -166,7 +172,7 @@ def configure_endpoints(app):
 
                 # If add user to group fails, we try to provide the operator with some additional useful info
                 try:
-                    merge_request_result = add_user_to_group_merge_request(email, groups, app.config)
+                    merge_request_result = add_user_to_group_merge_request(email, groups, current_app.config)
                     pr_url = merge_request_result['web_url']
                     context['pr_url'] = pr_url
                 except MalformedFusilladeConfigError:

@@ -52,11 +52,11 @@ class GitlabController:
     def __init__(self, config):
         # Also see config.py for how these are defined
         # Base config
-        self.gitlab_api_url = config.GITLAB_API_URL
-        self.gitlab_project_id = config.GITLAB_PROJECT_ID
+        self.gitlab_api_url = config['GITLAB_API_URL']
+        self.gitlab_project_id = config['GITLAB_PROJECT_ID']
         
         # Local config
-        self.access_token = config.GITLAB_API_TOKEN
+        self.access_token = config['GITLAB_API_TOKEN']
 
         # Derived variables
         self.access_headers = {"PRIVATE-TOKEN": self.access_token}
@@ -145,7 +145,7 @@ class GitlabController:
 
     @staticmethod
     def _get_ci_branch(config):
-        stage = config.FUS_DEPLOYMENT_STAGE
+        stage = config['FUS_DEPLOYMENT_STAGE']
         # Keep it simple:
         # integration (webapp) -> integration (fusillade)
         # staging (webapp) -> staging (fusillade)
