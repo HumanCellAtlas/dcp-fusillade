@@ -1,4 +1,6 @@
 import json
+
+from sites.zappa.app.errors import GitlabError
 from .controllers import GitlabController, FileController
 from flask import Flask
 import boto3
