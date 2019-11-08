@@ -70,7 +70,7 @@ def update_roles(name: str, policy: dict, new: bool):
             headers=headers,
             json={
                 "role_id": name,
-                "policy": json.dumps(policy)
+                "policy": policy
             }
         )
         resp.raise_for_status()
@@ -79,7 +79,7 @@ def update_roles(name: str, policy: dict, new: bool):
         resp = requests.put(
             f"{auth_url}/v1/role/{name}/policy",
             headers=headers,
-            json={"policy": json.dumps(policy)}
+            json={"policy": policy}
         )
         resp.raise_for_status()
         message = f"Updated role {name}."
@@ -176,7 +176,7 @@ def make_config(config: dict) -> dict:
         )
         resp.raise_for_status()
         policy = resp.json()['policies'].get('IAMPolicy')
-        if json.dumps(config['roles'][name]['policy']) != policy:
+        if config['roles'][name]['policy'] != policy:
             new_roles_config[name] = config['roles'][name]
             new_roles_config[name].update(new=False)
             outdated_roles.append(name)
