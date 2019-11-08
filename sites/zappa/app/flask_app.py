@@ -31,14 +31,12 @@ def configure_app(app, test_config):
 
     # Set config variables using an object
     # http://flask.pocoo.org/docs/api/#configuration
-    app.config.from_object(DefaultConfig)
-
     if test_config is not None:
+        # if user passes in a test config, it is because we are testing
+        app.config.from_object(TestConfig)
         app.config.update(test_config)
     else:
-        # load the instance config, if it exists, when not testing
-        stage = os.environ.get('FUS_DEPLOYMENT_STAGE')
-        app.config.from_pyfile(f"{stage}.cfg", silent=True)
+        app.config.from_object(LiveConfig)
 
     # Set this if behind a TLS/HTTPS proxy
     # app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -91,9 +89,8 @@ def configure_logging(app):
     app.logger.setLevel(logging.INFO)
 
 
-def check_user_in_org(user_orgs_resp, org_name):
+def check_user_in_org(all_orgs, org_name):
     """Given a response from github.get("/user/orgs"), determine if the user is in an organization"""
-    all_orgs = user_orgs_resp.json()
     for org in all_orgs:
         if org["login"] == org_name:
             return True
@@ -104,15 +101,11 @@ def configure_endpoints(app):
 
     flask_root = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
-    # Simple ping endpoint
     @app.route("/ping")
     def ping():
+        """Simple ping pong endpoint"""
         return jsonify({"message": "pong"})
 
-    # When user hits index:
-    # - if not authorized via github, show them our login page
-    # - if member of HCA, show them the form
-    # - otherwise show them 403
     @app.route("/")
     def index():
         """Ask non-authenticated users to log in via github, redirect users who are in HCA to form"""
@@ -121,10 +114,8 @@ def configure_endpoints(app):
             return render_template("login.html"), 200
 
         resp = github.get("/user/orgs")
-        print(resp)
-
         if resp.ok:
-            if check_user_in_org(resp, app.config["GITHUB_ORG"]):
+            if check_user_in_org(resp.json(), app.config["GITHUB_ORG"]):
                 try:
                     context = {"groups": get_groups_from_gitlab()}
                     return render_template("index.html", **context), 200

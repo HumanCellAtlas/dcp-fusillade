@@ -1,6 +1,5 @@
 """
-The names of functions below can be passed as parameters
-to pytest test functions.
+Define fixtures, which can be passed as arguments to pytest functions.
 """
 import os
 import sys
@@ -13,14 +12,10 @@ sys.path.insert(0, pkg_root)  # noqa
 
 from app.flask_app import create_app
 
-
-app = create_app()
-
-
 """
-The following pytest fixtures can be bootstrapped upon
-each other. Start with app(), which has no arguments,
-and the fixtures that follow can use app as an input.
+Pytest fixtures can bootstrap upon one another - once a fixture is defined,
+it can be used in the definition of other fixtures. testapp is the first fixture,
+and can be used by subsequent fixtures.
 """
 
 @pytest.fixture
@@ -31,7 +26,7 @@ def testapp():
 
 @pytest.fixture
 def client(testapp):
-    return app.test_client()
+    return testapp.test_client()
 
 @pytest.fixture
 def authapp(testapp):
