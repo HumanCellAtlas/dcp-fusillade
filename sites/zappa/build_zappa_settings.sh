@@ -39,7 +39,7 @@ cat "$zappa_settings" | jq ".$stage.s3_bucket=\"$FUS_TERRAFORM_BACKEND_BUCKET_TE
 # Resource Tagging
 export DEPLOY_ORIGIN="$(whoami)-$(hostname)-$(git describe --tags --always)-$(date -u +'%Y-%m-%d-%H-%M-%S').deploy"
 cat "$zappa_settings" | jq ".$stage.tags.DSS_DEPLOY_ORIGIN=\"$DEPLOY_ORIGIN\" | \
-	.$stage.tags.Name=\"${FUS_PROJECT_TAG}--${FUS_SERVICE_TAG}-${FUS_STAGE_TAG}\" | \
+	.$stage.tags.Name=\"${FUS_PROJECT_TAG}-${FUS_SERVICE_TAG}-${FUS_STAGE_TAG}\" | \
 	.$stage.tags.service=\"${FUS_SERVICE_TAG}\"  | \
 	.$stage.tags.project=\"$FUS_PROJECT_TAG\" | \
 	.$stage.tags.owner=\"${FUS_OWNER_TAG}\" | \
