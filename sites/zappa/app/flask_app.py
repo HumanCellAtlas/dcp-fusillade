@@ -5,7 +5,7 @@ from flask import Flask, request, abort, jsonify, redirect, url_for, render_temp
 from flaskext.markdown import Markdown
 from flask_dance.contrib.github import make_github_blueprint, github
 
-from .config import DefaultConfig
+from .config import TestConfig, LocalConfig, LiveConfig
 from .utils import get_groups_from_gitlab, add_user_to_group_merge_request
 from .errors import GitlabError, EnvironmentVariableError, MalformedFusilladeConfigError
 
@@ -15,10 +15,10 @@ def get_headers():
     return {"Content-Type": "text/html", "Access-Control-Allow-Origin": "*"}
 
 
-def create_app(test_config=None):
+def create_app(user_config=None):
     """App factory method, see http://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/"""
     app = Flask(__name__, template_folder="templates", static_folder="static")
-    configure_app(app, test_config)
+    configure_app(app, user_config)
     configure_extensions(app)
     configure_blueprints(app)
     configure_error_handlers(app)
@@ -26,16 +26,25 @@ def create_app(test_config=None):
     return app
 
 
-def configure_app(app, test_config):
-    """Set flask app configuration"""
+def configure_app(app, user_config):
+    """Set flask app configuration, and set the (optional) user-provided config"""
 
     # Set config variables using an object
     # http://flask.pocoo.org/docs/api/#configuration
-    if test_config is not None:
-        # if user passes in a test config, it is because we are testing
-        app.config.from_object(TestConfig)
-        app.config.update(test_config)
+    if user_config is not None:
+        if user_config.get('TESTING', False):
+
+            # User passed in a testing configuration
+            app.config.from_object(TestConfig)
+            app.config.update(user_config)
+
+        elif user_config.get('LOCAL', False):
+            # User is running the Flask app locally
+            app.config.from_object(LocalConfig)
+            app.config.update(user_config)
+
     else:
+        # Do it live
         app.config.from_object(LiveConfig)
 
     # Set this if behind a TLS/HTTPS proxy
