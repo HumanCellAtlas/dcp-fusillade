@@ -23,7 +23,6 @@ def create_app(user_config=None):
     configure_blueprints(app)
     configure_error_handlers(app)
     configure_endpoints(app)
-    register_app_config(app)
     return app
 
 
@@ -195,8 +194,3 @@ def configure_endpoints(app):
         with open(os.path.join(flask_root, "templates", "faq.md"), "r") as f:
             context = dict(markdown_body=f.read())
         return render_template("faq.html", **context), 200
-
-
-def register_app_config(app):
-    """Define a static class that stores the app config for other components to use"""
-    AppConfigStore.config = app.config
