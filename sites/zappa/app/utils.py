@@ -1,15 +1,6 @@
 import json
 from .controllers import GitlabController, FileController
 from flask import Flask
-import boto3
-
-
-sm_client = boto3.client("secretsmanager")
-
-
-def get_secret(secret_id: str):
-    """Returns secret string from AWS Secrets Manager"""
-    return sm_client.get_secret_value(SecretId=secret_id).get("SecretString")
 
 
 def get_groups_from_gitlab(config) -> list:
@@ -31,7 +22,7 @@ def add_user_to_group_merge_request(service_account: str, groups: list, config) 
     group_file_path = "config/groups.json"
     gitlab = GitlabController(config)
     resp = gitlab.get_file_from_repo(group_file_path)
-    groups_file = FileController(app, resp.text, group_file_path)
+    groups_file = FileController(resp.text, group_file_path)
     # modify groups.json file thats committed currently
     groups_file.updated_data = groups_file.add_user_to_groups(service_account, groups)
     # create new branch, push changes
