@@ -15,35 +15,63 @@ class BaseConfig(object):
     """
     The base configuration class used by Flask to define its config.
     Base class is used by both tests and live deployments.
+    Parameters in this config class are populated from user's environment.
     """
 
     STAGE = os.environ["FUS_DEPLOYMENT_STAGE"]
 
+    # Gitlab things
+    GITLAB_API_URL = os.environ["GITLAB_URL"]
+    GITLAB_PROJECT_ID = os.environ["GITLAB_PROJECT_ID"]
+
+    # Github things
+    GITHUB_ORG = os.environ["GITHUB_ORG"]
+
+
 
 class TestConfig(object):
     """
-    Configuration class used for tests only
+    Configuration class used for tests only.
+    Parameters in this config class are populated from user's environment.
     """
 
     FLASK_SECRET_KEY = "SUPERSECRETFLASKKEYFORTESTING"
 
 
+class LocalConfig(object):
+    """
+    Configuration class used for running locally.
+    Parameters in this config class are populated from user's environment.
+    """
+
+    GITLAB_API_TOKEN = os.environ['GITLAB_API_TOKEN']
+    FLASK_SECRET_KEY = os.environ['FLASK_SECRET_KEY']
+    GITHUB_OAUTH_CLIENT_ID = os.environ['GITHUB_OAUTH_CLIENT_ID']
+    GITHUB_OAUTH_CLIENT_SECRET = os.environ['GITHUB_OAUTH_CLIENT_SECRET']
+
+
 class LiveConfig(object):
     """
-    Configuration class used for live deployments. This class uses AWS secrets manager
-    to retrieve most of the config variables.
+    Configuration class used for live deployments. 
+    Paramters in this config class are populated from the AWS secrets manager.
     """
 
     STORE = os.environ["FUS_SECRETS_STORE"]
 
-    # Gitlab things
-    GITLAB_PROJECT_ID = os.environ["GITLAB_PROJECT_ID"]
-    GITLAB_API_URL = os.environ["GITLAB_URL"]
-    GITLAB_API_TOKEN = get_secret(f"{self.STORE}/{self.STAGE}/{os.environ['WEBAPP_STASH_SECRET_NAME']}")
+    # Gitlab API token is packed into a secret
+    @property
+    @lru_cache(maxsize=1)
+    def GITLAB_API_TOKEN(self):
+        """Retrieve the Gitlab API token from the AWS secrets manager"""
+        return get_secret(f"{self.STORE}/{self.STAGE}/{os.environ['GITLAB_API_TOKEN_SECRET_NAME']}")
 
     # Flask and Github things are packed into the WEBAPP_STASH secret
-    GITHUB_ORG = os.environ["GITHUB_ORG"]
-    WEBAPP_STASH = get_secret(f"{self.STORE}/{self.STAGE}/{os.environ['WEBAPP_STASH_SECRET_NAME']}")
+    @property
+    @lru_cache(maxsize=1)
+    def WEBAPP_STASH(self):
+        """Retrieve the Flask/Github OAuth secrets from the AWS secrets manager"""
+        return json.loads(get_secret(f"{self.STORE}/{self.STAGE}/{os.environ['WEBAPP_STASH_SECRET_NAME']}"))
+
     FLASK_SECRET_KEY = self.WEBAPP_STASH["FLASK_SECRET_KEY"]
     GITHUB_OAUTH_CLIENT_ID = self.WEBAPP_STASH["GITHUB_OAUTH_CLIENT_ID"]
     GITHUB_OAUTH_CLIENT_SECRET = self.WEBAPP_STASH["GITHUB_OAUTH_CLIENT_SECRET"]
