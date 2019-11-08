@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 
-deploy-zappa:
+deploy:
 	$(MAKE) -C sites/zappa deploy
 
 apigateway:
