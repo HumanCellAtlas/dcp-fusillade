@@ -23,6 +23,7 @@ def create_app(user_config=None):
     configure_blueprints(app)
     configure_error_handlers(app)
     configure_endpoints(app)
+    register_app_config(app)
     return app
 
 
@@ -35,17 +36,21 @@ def configure_app(app, user_config):
         if user_config.get('TESTING', False):
 
             # User passed in a testing configuration
-            app.config.from_object(TestConfig)
+            app.config.from_object(TestConfig())
             app.config.update(user_config)
 
         elif user_config.get('LOCAL', False):
             # User is running the Flask app locally
-            app.config.from_object(LocalConfig)
+            app.config.from_object(LocalConfig())
+            app.config.update(user_config)
+
+        else:
+            # Probably never get here
             app.config.update(user_config)
 
     else:
         # Do it live
-        app.config.from_object(LiveConfig)
+        app.config.from_object(LiveConfig())
 
     # Set this if behind a TLS/HTTPS proxy
     # app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -109,6 +114,7 @@ def configure_endpoints(app):
     """Configure all endpoints for our flask app"""
 
     flask_root = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+    github_org = app.config["GITHUB_ORG"]
 
     @app.route("/ping")
     def ping():
@@ -118,15 +124,16 @@ def configure_endpoints(app):
     @app.route("/")
     def index():
         """Ask non-authenticated users to log in via github, redirect users who are in HCA to form"""
-        # check if user is logged in, if not redirect to login landing page
+
+        # Check if user is logged in, if not redirect to login landing page
         if not github.authorized:
             return render_template("login.html"), 200
 
         resp = github.get("/user/orgs")
         if resp.ok:
-            if check_user_in_org(resp.json(), app.config["GITHUB_ORG"]):
+            if check_user_in_org(resp.json(), github_org):
                 try:
-                    context = {"groups": get_groups_from_gitlab()}
+                    context = {"groups": get_groups_from_gitlab(app.config)}
                     return render_template("index.html", **context), 200
                 except GitlabError as e:
                     # To pass kwargs through to error pages, use a custom error class
@@ -149,7 +156,7 @@ def configure_endpoints(app):
 
         resp = github.get("/user/orgs")
         if resp.ok:
-            if check_user_in_org(resp, app.config["GITHUB_ORG"]):
+            if check_user_in_org(resp, github_org):
                 # Extract the form data as a dictionary
                 content_types = (["application/x-www-form-urlencoded"],)
 
@@ -160,7 +167,7 @@ def configure_endpoints(app):
 
                 # If add user to group fails, we try to provide the operator with some additional useful info
                 try:
-                    merge_request_result = add_user_to_group_merge_request(email, groups)
+                    merge_request_result = add_user_to_group_merge_request(email, groups, app.config)
                     pr_url = merge_request_result['web_url']
                     context['pr_url'] = pr_url
                 except MalformedFusilladeConfigError:
@@ -188,3 +195,8 @@ def configure_endpoints(app):
         with open(os.path.join(flask_root, "templates", "faq.md"), "r") as f:
             context = dict(markdown_body=f.read())
         return render_template("faq.html", **context), 200
+
+
+def register_app_config(app):
+    """Define a static class that stores the app config for other components to use"""
+    AppConfigStore.config = app.config

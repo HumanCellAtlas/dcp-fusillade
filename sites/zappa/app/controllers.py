@@ -49,12 +49,18 @@ class FileController:
 
 
 class GitlabController:
-    def __init__(self):
-        self.access_token = os.getenv("DCP_FUS_GL_TOKEN")
-        self.gitlab_api_url = os.getenv("GITLAB_API_URL")
+    def __init__(self, config):
+        # Also see config.py for how these are defined
+        # Base config
+        self.gitlab_api_url = config.GITLAB_API_URL
+        self.gitlab_project_id = config.GITLAB_PROJECT_ID
+        
+        # Local config
+        self.access_token = config.GITLAB_API_TOKEN
+
+        # Derived variables
         self.access_headers = {"PRIVATE-TOKEN": self.access_token}
-        self.gitlab_project_id = os.getenv("GITLAB_PROJECT_ID")
-        self.ci_branch = self._get_ci_branch()
+        self.ci_branch = self._get_ci_branch(config)
         self.timestamp = datetime.today().strftime("%Y%m%d-%H%M%S")
         self._new_branch_name = f"{self.ci_branch}-{self.timestamp}"
 
@@ -72,28 +78,21 @@ class GitlabController:
     def create_branch(self, service_account_name):
         gl_branch_path = f"/projects/{self.gitlab_project_id}/repository/branches"
         parameters = {"branch": self._new_branch_name, "ref": self.ci_branch}
-        url = f"{self.gitlab_url}{gl_branch_path}"
+        url = f"{self.gitlab_api_url}{gl_branch_path}"
         try:
             r = requests.post(url=url, headers=self.access_headers, params=parameters)
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            msg = "Error calling Gitlab URL to commit propposed changes "
+            msg = "Error calling Gitlab URL to commit proposed changes "
             msg += f"to branch ({self._new_branch_name}): "
             msg += str(err)
             raise GitlabError(msg)
         return r.json()
 
-    def get_gitlab_access_token(self):
-        secret_store = os.getenv("FUS_SECRETS_STORE")
-        secret_name = os.getenv("GITLAB_ACCESS_KEY_SECRET_NAME")
-        return sm_client.get_secret_value(SecretId=f"{secret_store}/{secret_name}").get(
-            "SecretString"
-        )
-
     # https://docs.gitlab.com/ee/api/commits.html
     def commit_changes_(self, service_account_name, modified_file: FileController):
         gl_commit_path = f"/projects/{self.gitlab_project_id}/repository/commits"
-        commit_message = f"This commit was created from DCP-Fusillade"
+        commit_message = f"This commit was created automatically by DCP-Fusillade"
         actions = [
             {
                 "action": "update",
@@ -101,8 +100,6 @@ class GitlabController:
                 "content": json.dumps(modified_file.updated_data, indent=2),
             }
         ]
-        # Note this might be able to be reduced to 1 api call to gitlab.
-        # may need to set force to true.
         payload = {
             "branch": self._new_branch_name,
             "start_branch": self.ci_branch,
@@ -117,7 +114,7 @@ class GitlabController:
             r = requests.post(url, headers=headers, data=json.dumps(payload))
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            msg = "Error calling Gitlab URL to commit propposed changes "
+            msg = "Error calling Gitlab URL to commit proposed changes "
             msg += f"to branch ({self._new_branch_name}): "
             msg += str(err)
             raise GitlabError(msg)
@@ -147,6 +144,14 @@ class GitlabController:
         return r.json()
 
     @staticmethod
-    def _get_ci_branch():
-        stage = os.getenv("FUS_DEPLOYMENT_STAGE")
-        return stage if stage != "dev" else "master"
+    def _get_ci_branch(config):
+        stage = config.FUS_DEPLOYMENT_STAGE
+        # Keep it simple:
+        # integration (webapp) -> integration (fusillade)
+        # staging (webapp) -> staging (fusillade)
+        # dev (webapp) -> dev (fusillade)
+        # testing (webapp) -> testing (fusillade)
+        if stage not in ['integration', 'staging', 'dev', 'testing']:
+            raise GitlabError(f"Error: specified target stage {stage} does not exist!")
+        return stage
+
