@@ -1,6 +1,7 @@
 import os
 from functools import lru_cache
 from .utils import get_secret
+import json
 
 
 class BaseConfig(object):
