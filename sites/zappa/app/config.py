@@ -2,7 +2,8 @@ import os
 from functools import lru_cache
 from .utils import get_secret
 import json
-import boto3
+
+
 
 
 class BaseConfig(object):
