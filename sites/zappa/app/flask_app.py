@@ -105,6 +105,7 @@ def configure_logging(app):
 
 def check_user_in_org(all_orgs, org_name):
     """Given a response from github.get("/user/orgs"), determine if the user is in an organization"""
+    print(all_orgs)
     for org in all_orgs:
         if org["login"] == org_name:
             return True
@@ -159,9 +160,14 @@ def configure_endpoints(app):
         if not github.authorized:
             return render_template("login.html"), 200
 
-        resp = github.get("/user/orgs")
+        try:
+            resp = github.get("/user/orgs")
+        except requests.exceptions.ConnectionError:
+            # Error with Github API
+            abort(404)
+
         if resp.ok:
-            if check_user_in_org(resp, github_org):
+            if check_user_in_org(resp.json(), github_org):
                 # Extract the form data as a dictionary
                 content_types = (["application/x-www-form-urlencoded"],)
 
