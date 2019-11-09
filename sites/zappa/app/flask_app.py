@@ -105,7 +105,6 @@ def configure_logging(app):
 
 def check_user_in_org(all_orgs, org_name):
     """Given a response from github.get("/user/orgs"), determine if the user is in an organization"""
-    print(all_orgs)
     for org in all_orgs:
         if org["login"] == org_name:
             return True

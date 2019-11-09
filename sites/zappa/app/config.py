@@ -1,9 +1,8 @@
 import os
 from functools import lru_cache
-from .utils import get_secret
 import json
 
-
+from .secrets import get_secret
 
 
 class BaseConfig(object):
@@ -104,32 +103,11 @@ class LiveConfig(BaseConfig):
     - GITHUB_OAUTH_CLIENT_ID: the client id of the github oauth app checking group membership
     - GITHUB_OAUTH_CLIENT_SECRET: the client secret of the github oauth app checking group membership
     """
-    sm_client = boto3.client("secretsmanager")
-
     def __init__(self):
         super().__init__()
 
         # This allows using http locally
         os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = "true"
-
-
-    def get_secret_prefix():
-        """Returns the prefix for secrets in the AWS Secrets Manager"""
-        store = os.environ["FUS_SECRETS_STORE"]
-        webapp = "/webapps/groupsusers"
-        stage = os.environ["FUS_DEPLOYMENT_STAGE"]
-        prefix = f"{store}/{webapp}/{stage}/{secret_name}"
-        return prefix
-
-
-    def get_secret(secret_name: str):
-        """Given a secret name, add the secret store prefix and retrieve the secret string from AWS Secrets Manager"""
-        prefix = get_secret_prefix()
-        secret_name = secret_name.rstrip("/")
-        # If prefix is present in the front, remove it. Then prepend prefix.
-        secret_id = f"{prefix}/" + secret_name.replace(prefix, "", 1).lstrip("/")
-        return self.sm_client.get_secret_value(SecretId=secret_id).get("SecretString")
-
 
     @property
     @lru_cache(maxsize=1)
@@ -137,7 +115,7 @@ class LiveConfig(BaseConfig):
         """Retrieve the Gitlab access token from AWS secrets manager (cached)"""
         # The user does not need to provide the secrets store prefix
         token_sec_name = os.environ['GITLAB_API_TOKEN_SECRET_NAME']
-        return self.get_secret(secret_name)
+        return get_secret(secret_name)
 
     # Flask and Github things are packed into the WEBAPP_STASH secret
     @property
@@ -145,7 +123,7 @@ class LiveConfig(BaseConfig):
     def WEBAPP_STASH(self):
         """Retrieves the Flask/Github OAuth secrets from the AWS secrets manager (cached)"""
         stash_sec_name = os.environ['WEBAPP_SECRET_STASH_NAME']
-        return json.loads(self.get_secret(secret_name))
+        return json.loads(get_secret(secret_name))
 
     @property
     def FLASK_SECRET_KEY(self):
