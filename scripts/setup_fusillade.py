@@ -34,8 +34,8 @@ parser.add_argument('--file',
                     help="A file containing a fusillade configuration.",
                     required=True)
 parser.add_argument("--secret",
-                    help="secretId of a service account in AWS with permission to modify groups in the fusillade "
-                         "deployment",
+                    help="secretId of secret stored in AWS Secrets Manager containing google service account "
+                         "credentials with permission to modify groups in the fusillade deployment.",
                     type=str,
                     default="deployer_service_account.json",
                     required=False)
