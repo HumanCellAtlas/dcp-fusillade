@@ -1,5 +1,25 @@
 {
   "roles": {
+    "azul_admin": {
+      "policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "azul_admin",
+            "Effect": "Allow",
+            "Action": [
+              "fus:*"
+            ],
+            "Resource": [
+              "arn:hca:fus:*:*:user/*",
+              "arn:hca:fus:*:*:group/azul*",
+              "arn:hca:fus:*:*:role/azul*",
+              "arn:hca:fus:*:*:resource/azul*"
+            ]
+          }
+        ]
+      }
+    },
     "default_user": {
       "policy": {
         "Version": "2012-10-17",
