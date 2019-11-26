@@ -35,6 +35,7 @@ json_lint:
   extends: .tests
   script:
     - python -m json.tool ./config/groups.json > /dev/null || exit 1
+    - python -m json.tool ./config/roles.json > /dev/null || exit 1
 
 deploy:
   stage: deploy
