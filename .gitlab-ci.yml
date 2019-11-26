@@ -23,8 +23,8 @@ before_script:
 security_checks:
   extends: .tests
   before_script:
-      - virtualenv ~/venv
-      - source ~/venv/bin/activate
+    - virtualenv ~/venv
+    - source ~/venv/bin/activate
   script:
     - pip install trufflehog
     - wget -O regex.json https://raw.githubusercontent.com/HumanCellAtlas/dcplib/master/components/trufflehog_regex_patterns.json
