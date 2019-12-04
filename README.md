@@ -34,7 +34,7 @@ when they are first created.
 DCP Components should use the Fusillade testing environment to test their dev code. This is to ensure relative 
 stability when developing for the DCP.
 
-All other component stages should use fusillade integration, staging, and production respectively.
+All other component stages should use fusillade integration, staging, and prod respectively.
 
 ## Resource
 

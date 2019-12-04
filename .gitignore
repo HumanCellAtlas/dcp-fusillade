@@ -107,3 +107,6 @@ backend.tf
 variables.tf
 providers.tf
 gcp-credentials.json
+
+# pycharm
+.idea

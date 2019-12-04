@@ -21,7 +21,7 @@ auth_deployments = {
     'integration': "https://auth.integration.data.humancellatlas.org",
     'staging': "https://auth.staging.data.humancellatlas.org",
     "testing": "https://auth.testing.data.humancellatlas.org",
-    "production": "https://auth.data.humancellatlas.org"
+    "prod": "https://auth.data.humancellatlas.org"
 }
 
 parser = argparse.ArgumentParser(description=__doc__)
