@@ -9,27 +9,27 @@ data "google_project" "project" {}
 
 
 resource "google_service_account" "deployer" {
-  display_name = "${var.GCP_SERVICE_ACCOUNT_NAME}"
-  account_id = "${var.GCP_SERVICE_ACCOUNT_NAME}"
+  display_name =  var.GCP_SERVICE_ACCOUNT_NAME
+  account_id =  var.GCP_SERVICE_ACCOUNT_NAME
 }
 
 # Useful command to discover role names (Guessing based on console titles is difficult):
 # `gcloud iam list-grantable-roles //cloudresourcemanager.googleapis.com/projects/{project-id}`
 
 resource "google_project_iam_member" "viewer" {
-  project = "${data.google_project.project.project_id}"
+  project =  data.google_project.project.project_id
   role = "roles/viewer"
   member = "serviceAccount:${google_service_account.deployer.email}"
 }
 
 resource "aws_secretsmanager_secret" "gcp-service-account-key" {
-  name = "${var.GCP_SERVICE_ACCOUNT_KEY_SECRET_ID}"
+  name =  var.GCP_SERVICE_ACCOUNT_KEY_SECRET_ID
   tags = {
     project = "dcp"
-    env = "${var.FUS_DEPLOYMENT_STAGE}"
-    owner = "${var.FUS_OWNER_TAG}"
+    env =  var.FUS_DEPLOYMENT_STAGE
+    owner =  var.FUS_OWNER_TAG
     service = "fusillade"
-    Name = "${var.GCP_SERVICE_ACCOUNT_KEY_SECRET_ID}"
+    Name =  var.GCP_SERVICE_ACCOUNT_KEY_SECRET_ID
     managedBy = "Terraform"
   }
 }
@@ -48,5 +48,5 @@ resource "null_resource" "gcp-service-account-key" {
 }
 
 output "service_account" {
-  value = "${var.GCP_SERVICE_ACCOUNT_NAME}"
+  value =  var.GCP_SERVICE_ACCOUNT_NAME
 }
